@@ -1,6 +1,6 @@
-import { GetUsersController } from "./controllers/get-users/get-users";
 import express from "express";
 import { config } from "dotenv";
+import { GetUsersController } from "./controllers/get-users/get-users";
 import { MongoGetUsersRepository } from "./repositories/get_users/mongo-get-users";
 import { MongoClient } from "./database/mongo";
 
