@@ -5,6 +5,7 @@ import {
 } from "../../controllers/update-user/protocols";
 import { MongoClient } from "../../database/mongo";
 import { User } from "../../models/user";
+import { MongoUser } from "../mongo-protocols";
 
 export class MongoUpdateUserRepository implements IUpdateUserRepository {
   async updateUser(
@@ -22,7 +23,7 @@ export class MongoUpdateUserRepository implements IUpdateUserRepository {
     );
     //procurando o usuário pelo ID
     const user = await MongoClient.db
-      .collection<Omit<User, "id">>("users")
+      .collection<MongoUser>("users")
       .findOne({ _id: new ObjectId(id) });
     //se não achar o usuário vai executar esse erro
     if (!user) {
