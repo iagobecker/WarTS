@@ -1,4 +1,5 @@
 import { User } from "../../models/user";
+import { badRequest, ok, serverError } from "../helpers";
 import { HttpRequest, HttpResponse, IController } from "../protocols";
 import { IUpdateUserRepository, UpdateUserParams } from "./protocols";
 
@@ -7,23 +8,17 @@ export class UpdateUserController implements IController {
 
   async handle(
     HttpRequest: HttpRequest<UpdateUserParams>
-  ): Promise<HttpResponse<User>> {
+  ): Promise<HttpResponse<User | string>> {
     try {
       const id = HttpRequest?.params?.id;
       const body = HttpRequest?.body;
 
       if (!body) {
-        return {
-          statusCode: 400,
-          body: "Campos ausentes",
-        };
+        return badRequest("Campos ausentes");
       }
 
       if (!id) {
-        return {
-          statusCode: 400,
-          body: "id de usuário ausente",
-        };
+        return badRequest("id de usuário ausente");
       }
 
       const allowedFieldsToUpdate: /*Campos permitidos para atualizar */ (keyof UpdateUserParams)[] =
@@ -36,23 +31,14 @@ export class UpdateUserController implements IController {
         );
 
       if (someFieldIsNotAllowedToUpdate) {
-        return {
-          statusCode: 400,
-          body: "Alguns campos recebidos não são permitidos",
-        };
+        return badRequest("Alguns campos recebidos não são permitidos");
       }
 
       const user = await this.updateUserRepository.updateUser(id, body);
 
-      return {
-        statusCode: 200,
-        body: user,
-      };
+      return ok<User>(user);
     } catch (error) {
-      return {
-        statusCode: 500,
-        body: "Algo deu errado.",
-      };
+      return serverError();
     }
   }
 }

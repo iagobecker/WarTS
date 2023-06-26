@@ -2,13 +2,14 @@ import validator from "validator";
 import { User } from "../../models/user";
 import { HttpRequest, HttpResponse, IController } from "./../protocols";
 import { CreateUserParams, ICreateUserRepository } from "./protocols";
+import { badRequest, created, serverError } from "../helpers";
 
 export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
   async handle(
     httpRequest: HttpRequest<CreateUserParams>
-  ): Promise<HttpResponse<User>> {
+  ): Promise<HttpResponse<User | string>> {
     try {
       //verificar se campos obrigatórios estão presentes
       const requiredFields = ["name", "email", "password"];
@@ -16,10 +17,7 @@ export class CreateUserController implements IController {
       for (const field of requiredFields) {
         if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
           //validar se o body existe
-          return {
-            statusCode: 400,
-            body: `campo ${field} obrigatório`,
-          };
+          return badRequest(`Campo ${field} obrigatório`);
         }
       }
 
@@ -28,25 +26,16 @@ export class CreateUserController implements IController {
 
       //se o email não for válido vai executar esse IF
       if (!emailIsValid) {
-        return {
-          statusCode: 400,
-          body: "E-Mail inválido!",
-        };
+        return badRequest("E-Mail inválido!");
       }
 
       const user = await this.createUserRepository.createUser(
         httpRequest.body!
       );
 
-      return {
-        statusCode: 201,
-        body: user,
-      };
+      return created<User>(user);
     } catch (error) {
-      return {
-        statusCode: 500,
-        body: "Algo deu errado!!",
-      };
+      return serverError();
     }
   }
 }
