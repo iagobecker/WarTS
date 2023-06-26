@@ -1,25 +1,25 @@
-import { HttpResponse } from "./protocols";
+import { HttoStatusCode, HttpResponse } from "./protocols";
 
 export const ok = <T>(body: any): HttpResponse<T> => ({
-  statusCode: 200,
+  statusCode: HttoStatusCode.OK,
   body,
 });
 
 export const created = <T>(body: any): HttpResponse<T> => ({
-  statusCode: 201,
+  statusCode: HttoStatusCode.CREATED,
   body,
 });
 
 export const badRequest = (message: string): HttpResponse<string> => {
   return {
-    statusCode: 400,
+    statusCode: HttoStatusCode.BAD_REQUEST,
     body: message,
   };
 };
 
 export const serverError = (): HttpResponse<string> => {
   return {
-    statusCode: 500,
+    statusCode: HttoStatusCode.SERVER_ERROR,
     body: "Algo deu errado.",
   };
 };
