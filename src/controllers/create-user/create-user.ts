@@ -12,7 +12,7 @@ export class CreateUserController implements IController {
   ): Promise<HttpResponse<User | string>> {
     try {
       //verificar se campos obrigatórios estão presentes
-      const requiredFields = ["name", "email", "password"];
+      const requiredFields = ["name", "email", "password", "birthday", "cpf"];
 
       for (const field of requiredFields) {
         if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
