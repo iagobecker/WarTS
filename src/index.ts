@@ -9,6 +9,8 @@ import { MongoUpdateUserRepository } from "./repositories/update-user/mongo-upda
 import { UpdateUserController } from "./controllers/update-user/update-user";
 import { MongoDeleteUserRepository } from "./repositories/delete-user/mongo-delete-user";
 import { DeleteUserController } from "./controllers/delete-user/delete-user";
+import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
+import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
 
 const main = async () => {
   config();
@@ -28,7 +30,7 @@ const main = async () => {
 
     res.status(statusCode).send(body);
   });
-
+  //POST /users
   app.post("/users", async (req, res) => {
     const mongoCreateUserRepository = new MongoCreateUserRepository();
 
@@ -41,6 +43,26 @@ const main = async () => {
     });
 
     res.status(statusCode).send(body);
+  });
+
+  //POST /indications
+  app.post("/indications", async (req, res) => {
+    try {
+      const mongoCreateIndicatedRepository =
+        new MongoCreateIndicatedRepository();
+
+      const createIndicationController = new CreateIndicationController(
+        mongoCreateIndicatedRepository
+      );
+
+      const { body, statusCode } = await createIndicationController.handle({
+        body: req.body,
+      });
+
+      res.status(statusCode).send(body);
+    } catch (error) {
+      res.status(500).send("Internal Server Error");
+    }
   });
 
   app.patch("/users/:id", async (req, res) => {

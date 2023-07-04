@@ -3,6 +3,7 @@ import { User } from "../../models/user";
 import { HttpRequest, HttpResponse, IController } from "./../protocols";
 import { CreateUserParams, ICreateUserRepository } from "./protocols";
 import { badRequest, created, serverError } from "../helpers";
+import { cpf } from "cpf-cnpj-validator";
 
 export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
@@ -29,6 +30,30 @@ export class CreateUserController implements IController {
         return badRequest("E-Mail inválido!");
       }
 
+      // Verificar se a senha possui ao menos uma letra maiúscula
+      const passwordHasUppercase = /[A-Z]/.test(httpRequest.body!.password);
+
+      if (!passwordHasUppercase) {
+        return badRequest("A senha deve conter ao menos uma letra maiúscula");
+      }
+
+      // Verificar se o campo birthday está no formato de data DD/MM/AAAA
+      const birthday = httpRequest.body!.birthday;
+      const birthdayIsValid = isValidDateFormat(birthday);
+
+      if (!birthdayIsValid) {
+        return badRequest(
+          "Formato de data inválido para o campo birthday. Utilize o formato DD/MM/AAAA"
+        );
+      }
+
+      // Verificar se o campo cpf é um CPF válido
+      const cpfIsValid = cpf.isValid(httpRequest.body!.cpf);
+
+      if (!cpfIsValid) {
+        return badRequest("CPF inválido");
+      }
+
       const user = await this.createUserRepository.createUser(
         httpRequest.body!
       );
@@ -38,4 +63,9 @@ export class CreateUserController implements IController {
       return serverError();
     }
   }
+}
+
+function isValidDateFormat(date: string): boolean {
+  const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+  return dateRegex.test(date);
 }
