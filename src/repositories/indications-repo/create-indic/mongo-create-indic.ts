@@ -4,7 +4,7 @@ import {
 } from "./../../../controllers/indications-controller/create-indic/protocols";
 import { MongoClient } from "./../../../database/mongo";
 import { Indicated } from "../../../models/indicated";
-import { MongoIndicate } from "../../mongo-protocols";
+import MongoIndicate from "../../mongo-protocols";
 
 export class MongoCreateIndicatedRepository
   implements ICreateIndicateRepository
@@ -12,7 +12,7 @@ export class MongoCreateIndicatedRepository
   async createIndicate(params: CreateIndicateParams): Promise<Indicated> {
     // Criar a indicação
     const { insertedId } = await MongoClient.db
-      .collection("indications")
+      .collection<MongoIndicate>("indications")
       .insertOne(params);
 
     // Buscar a indicação e verificar se foi criada
