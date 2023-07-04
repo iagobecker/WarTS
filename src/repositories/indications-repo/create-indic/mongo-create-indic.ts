@@ -13,7 +13,7 @@ export class MongoCreateIndicatedRepository
   async createIndicate(params: CreateIndicateParams): Promise<Indicated> {
     // Verificar se campos obrigatórios estão presentes
     const requiredFields: Array<keyof CreateIndicateParams> = [
-      "indicatingClientId",
+      "id",
       "name",
       "email",
     ];

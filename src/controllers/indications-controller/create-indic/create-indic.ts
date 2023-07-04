@@ -15,9 +15,9 @@ export class CreateIndicationController implements IController {
     try {
       // Verificar se campos obrigatórios estão presentes
       const requiredFields: (keyof CreateIndicateParams)[] = [
-        "indicatingClientId",
         "name",
         "email",
+        "phone",
       ];
 
       for (const field of requiredFields) {

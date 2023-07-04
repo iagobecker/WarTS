@@ -1,8 +1,12 @@
 import { Indicated } from "../../../models/indicated";
 export interface CreateIndicateParams {
-  indicatingClientId: string;
+  id: string;
   name: string;
   email: string;
+  phone: string;
+  referralId: number | null;
+  indicationDate: string;
+  indicationStatus: 1 | 2;
 }
 
 export interface ICreateIndicateRepository {
