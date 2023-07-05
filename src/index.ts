@@ -46,7 +46,7 @@ const main = async () => {
   });
 
   //POST /indications
-  app.post("/indications", async (req, res) => {
+  app.post("users/indications", async (req, res) => {
     try {
       const mongoCreateIndicatedRepository =
         new MongoCreateIndicatedRepository();
