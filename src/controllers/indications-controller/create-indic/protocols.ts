@@ -1,6 +1,5 @@
 import { Indicated } from "../../../models/indicated";
 export interface CreateIndicateParams {
-  id: string;
   name: string;
   email: string;
   phone: string;
