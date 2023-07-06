@@ -17,5 +17,6 @@ export const MongoClient = {
 
     console.log("connected to mongoDB");
     db.collection("users").find();
+    db.collection("indications").find();
   },
 };
