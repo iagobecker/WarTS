@@ -1,3 +1,4 @@
+import { GetIndicatesController } from "./controllers/indications-controller/get-indic/get-indic";
 import express from "express";
 import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
@@ -11,6 +12,7 @@ import { MongoDeleteUserRepository } from "./repositories/delete-user/mongo-dele
 import { DeleteUserController } from "./controllers/delete-user/delete-user";
 import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
+import { MongoGetIndicatesRepository } from "./repositories/indications-repo/get-indic/mongo-get-indicates";
 
 const main = async () => {
   config();
@@ -20,7 +22,7 @@ const main = async () => {
   app.use(express.json());
 
   await MongoClient.connect();
-
+  //GET Users
   app.get("/users", async (req, res) => {
     const mongoGetUsersRepository = new MongoGetUsersRepository();
 
@@ -30,6 +32,20 @@ const main = async () => {
 
     res.status(statusCode).send(body);
   });
+
+  //GET Indicates
+  app.get("/indicates", async (req, res) => {
+    const mongoGetIndicatesRepository = new MongoGetIndicatesRepository();
+
+    const getIndicatesController = new GetIndicatesController(
+      mongoGetIndicatesRepository
+    );
+
+    const { body, statusCode } = await getIndicatesController.handle();
+
+    res.status(statusCode).send(body);
+  });
+
   //POST /users
   app.post("/users", async (req, res) => {
     const mongoCreateUserRepository = new MongoCreateUserRepository();
