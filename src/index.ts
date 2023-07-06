@@ -43,26 +43,26 @@ const main = async () => {
     });
 
     res.status(statusCode).send(body);
+  });
 
-    //POST /indications
-    app.post("/users/indications", async (req, res) => {
-      try {
-        const mongoCreateIndicatedRepository =
-          new MongoCreateIndicatedRepository();
+  //POST /indications
+  app.post("/users/indications", async (req, res) => {
+    try {
+      const mongoCreateIndicatedRepository =
+        new MongoCreateIndicatedRepository();
 
-        const createIndicationController = new CreateIndicationController(
-          mongoCreateIndicatedRepository
-        );
+      const createIndicationController = new CreateIndicationController(
+        mongoCreateIndicatedRepository
+      );
 
-        const { body, statusCode } = await createIndicationController.handle({
-          body: req.body,
-        });
+      const { body, statusCode } = await createIndicationController.handle({
+        body: req.body,
+      });
 
-        res.status(statusCode).send(body);
-      } catch (error) {
-        res.status(500).send("Internal Server Error");
-      }
-    });
+      res.status(statusCode).send(body);
+    } catch (error) {
+      res.status(500).send("Internal Server Error");
+    }
   });
 
   app.patch("/users/:id", async (req, res) => {
