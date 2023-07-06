@@ -22,6 +22,7 @@ const main = async () => {
   app.use(express.json());
 
   await MongoClient.connect();
+
   //GET Users
   app.get("/users", async (req, res) => {
     const mongoGetUsersRepository = new MongoGetUsersRepository();
@@ -83,28 +84,30 @@ const main = async () => {
 
   app.patch("/users/:id", async (req, res) => {
     const mongoUpdateUserRepository = new MongoUpdateUserRepository();
-    /*⬇*/
+
     const updateUserController = new UpdateUserController(
       mongoUpdateUserRepository
     );
-    /*⬇*/
+
     const { body, statusCode } = await updateUserController.handle({
       body: req.body,
       params: req.params,
     });
+
     res.status(statusCode).send(body);
   });
 
   app.delete("/users/:id", async (req, res) => {
     const mongoDeleteUserRepository = new MongoDeleteUserRepository();
-    /*⬇*/
+
     const deleteUserController = new DeleteUserController(
       mongoDeleteUserRepository
     );
-    /*⬇*/
+
     const { body, statusCode } = await deleteUserController.handle({
       params: req.params,
     });
+
     res.status(statusCode).send(body);
   });
 
