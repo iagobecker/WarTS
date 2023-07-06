@@ -1,8 +1,8 @@
-import { serverError, created, badRequest } from "./../../helpers";
-import { IController, HttpResponse, HttpRequest } from "./../../protocols";
 import validator from "validator";
 import { Indicated } from "../../../models/indicated";
+import { HttpRequest, HttpResponse, IController } from "./../../protocols";
 import { CreateIndicateParams, ICreateIndicateRepository } from "./protocols";
+import { badRequest, created, serverError } from "./../../helpers";
 
 export class CreateIndicationController implements IController {
   constructor(
@@ -11,24 +11,33 @@ export class CreateIndicationController implements IController {
 
   async handle(
     httpRequest: HttpRequest<CreateIndicateParams>
-  ): Promise<HttpResponse<any>> {
+  ): Promise<HttpResponse<Indicated | string>> {
     try {
       // Verificar se campos obrigatórios estão presentes
-      const requiredFields: (keyof CreateIndicateParams)[] = [
-        "name",
-        "email",
-        "phone",
-      ];
+      const requiredFields = ["name", "email", "phone"];
 
       for (const field of requiredFields) {
-        if (!httpRequest?.body?.[field]) {
+        const value = httpRequest.body?.[field as keyof CreateIndicateParams];
+
+        if (!value || (typeof value === "string" && !value.length)) {
           return badRequest(`Campo ${field} obrigatório`);
         }
       }
 
+      /* for (const field of requiredFields) {
+        if (!httpRequest?.body?.[field as keyof CreateIndicateParams]?.length) {
+          return badRequest(`Campo ${field} obrigatório`);
+        }
+      }*/
+
       // Verificar se o e-mail é válido
-      const email = httpRequest.body?.email;
+      /*const email = httpRequest.body?.email;
       if (!email || !validator.isEmail(email)) {
+        return badRequest("E-mail inválido");
+      }*/
+      const emailIsValid = validator.isEmail(httpRequest.body!.email);
+
+      if (!emailIsValid) {
         return badRequest("E-mail inválido");
       }
 

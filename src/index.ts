@@ -1,7 +1,8 @@
-import { GetIndicatesController } from "./controllers/indications-controller/get-indic/get-indic";
 import express from "express";
 import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
+import { GetIndicatesController } from "./controllers/indications-controller/get-indic/get-indic";
+import { MongoGetIndicatesRepository } from "./repositories/indications-repo/get-indic/mongo-get-indicates";
 import { MongoGetUsersRepository } from "./repositories/get_users/mongo-get-users";
 import { MongoClient } from "./database/mongo";
 import { MongoCreateUserRepository } from "./repositories/create-user/mongo-create-user";
@@ -12,7 +13,6 @@ import { MongoDeleteUserRepository } from "./repositories/delete-user/mongo-dele
 import { DeleteUserController } from "./controllers/delete-user/delete-user";
 import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
-import { MongoGetIndicatesRepository } from "./repositories/indications-repo/get-indic/mongo-get-indicates";
 
 const main = async () => {
   config();
@@ -34,7 +34,7 @@ const main = async () => {
   });
 
   //GET Indicates
-  app.get("/users/indicates", async (req, res) => {
+  app.get("/indicates", async (req, res) => {
     const mongoGetIndicatesRepository = new MongoGetIndicatesRepository();
 
     const getIndicatesController = new GetIndicatesController(
