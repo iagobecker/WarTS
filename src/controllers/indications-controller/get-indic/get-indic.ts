@@ -10,9 +10,9 @@ export class GetIndicatesController implements IController {
 
   async handle(): Promise<HttpResponse<Indicated[] | string>> {
     try {
-      const indicates = await this.getIndicatesRepository.getIndicates();
+      const indications = await this.getIndicatesRepository.getIndicates();
 
-      return ok<Indicated[]>(indicates);
+      return ok<Indicated[]>(indications);
     } catch (error) {
       return serverError();
     }

@@ -35,7 +35,7 @@ const main = async () => {
   });
 
   //GET Indicates
-  app.get("/indicates", async (req, res) => {
+  app.get("/indications", async (req, res) => {
     const mongoGetIndicatesRepository = new MongoGetIndicatesRepository();
 
     const getIndicatesController = new GetIndicatesController(

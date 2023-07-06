@@ -5,12 +5,12 @@ import { MongoIndicate } from "./../../mongo-protocols";
 
 export class MongoGetIndicatesRepository implements IGetIndicatesRepository {
   async getIndicates(): Promise<Indicated[]> {
-    const indicates = await MongoClient.db
-      .collection<MongoIndicate>("indicates")
+    const indications = await MongoClient.db
+      .collection<MongoIndicate>("indications")
       .find({})
       .toArray();
 
-    return indicates.map(({ _id, ...rest }) => ({
+    return indications.map(({ _id, ...rest }) => ({
       ...rest,
       id: _id.toHexString(),
     }));
