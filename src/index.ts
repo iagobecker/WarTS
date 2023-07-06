@@ -34,7 +34,7 @@ const main = async () => {
   });
 
   //GET Indicates
-  app.get("/indicates", async (req, res) => {
+  app.get("/users/indicates", async (req, res) => {
     const mongoGetIndicatesRepository = new MongoGetIndicatesRepository();
 
     const getIndicatesController = new GetIndicatesController(
@@ -62,7 +62,7 @@ const main = async () => {
   });
 
   //POST /indications
-  app.post("/users/indications", async (req, res) => {
+  app.post("/users/indicates", async (req, res) => {
     try {
       const mongoCreateIndicatedRepository =
         new MongoCreateIndicatedRepository();

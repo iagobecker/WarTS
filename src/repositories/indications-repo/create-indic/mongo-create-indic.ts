@@ -1,10 +1,10 @@
+import { MongoIndicate } from "./../../mongo-protocols";
 import {
   ICreateIndicateRepository,
   CreateIndicateParams,
 } from "./../../../controllers/indications-controller/create-indic/protocols";
 import { MongoClient } from "./../../../database/mongo";
 import { Indicated } from "../../../models/indicated";
-import MongoIndicate from "../../mongo-protocols";
 
 export class MongoCreateIndicatedRepository
   implements ICreateIndicateRepository
