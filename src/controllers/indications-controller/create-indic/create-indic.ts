@@ -46,10 +46,6 @@ export class CreateIndicationController implements IController {
         httpRequest.body!
       );
 
-      if (!indication) {
-        return badRequest("Falha ao criar a indicação");
-      }
-
       return created<Indicated>(indication);
     } catch (error) {
       return serverError();

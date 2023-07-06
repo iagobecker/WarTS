@@ -54,6 +54,7 @@ export class CreateUserController implements IController {
         return badRequest("CPF inválido");
       }
 
+      //Criação do user
       const user = await this.createUserRepository.createUser(
         httpRequest.body!
       );
