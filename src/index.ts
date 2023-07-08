@@ -1,3 +1,5 @@
+import { UpdateIndicatesController } from "./controllers/indications-controller/update-indic/update-indic";
+import { MongoUpdateIndicatesRepository } from "./repositories/indications-repo/update-indic/mongo-update-indic";
 import express from "express";
 import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
@@ -82,6 +84,7 @@ const main = async () => {
     }
   });
 
+  //PATCH Users
   app.patch("/users/:id", async (req, res) => {
     const mongoUpdateUserRepository = new MongoUpdateUserRepository();
 
@@ -90,6 +93,22 @@ const main = async () => {
     );
 
     const { body, statusCode } = await updateUserController.handle({
+      body: req.body,
+      params: req.params,
+    });
+
+    res.status(statusCode).send(body);
+  });
+
+  //PATCH Indications
+  app.patch("/indications/:id", async (req, res) => {
+    const mongoUpdateIndicatesRepository = new MongoUpdateIndicatesRepository();
+
+    const updateIndicatesController = new UpdateIndicatesController(
+      mongoUpdateIndicatesRepository
+    );
+
+    const { body, statusCode } = await updateIndicatesController.handle({
       body: req.body,
       params: req.params,
     });
