@@ -1,3 +1,5 @@
+import { DeleteIndicatesController } from "./controllers/indications-controller/delete-indic/delete-indic";
+import { MongoDeleteIndicatesRepository } from "./repositories/indications-repo/delete-indic/mongo-delete-indic";
 import { UpdateIndicatesController } from "./controllers/indications-controller/update-indic/update-indic";
 import { MongoUpdateIndicatesRepository } from "./repositories/indications-repo/update-indic/mongo-update-indic";
 import express from "express";
@@ -116,6 +118,7 @@ const main = async () => {
     res.status(statusCode).send(body);
   });
 
+  //Delete user
   app.delete("/users/:id", async (req, res) => {
     const mongoDeleteUserRepository = new MongoDeleteUserRepository();
 
@@ -124,6 +127,21 @@ const main = async () => {
     );
 
     const { body, statusCode } = await deleteUserController.handle({
+      params: req.params,
+    });
+
+    res.status(statusCode).send(body);
+  });
+
+  //Delete Indication
+  app.delete("/indications/:id", async (req, res) => {
+    const mongoDeleteIndicatesRepository = new MongoDeleteIndicatesRepository();
+
+    const deleteIndicatesController = new DeleteIndicatesController(
+      mongoDeleteIndicatesRepository
+    );
+
+    const { body, statusCode } = await deleteIndicatesController.handle({
       params: req.params,
     });
 
