@@ -35,10 +35,27 @@ export class CreateIndicationController implements IController {
       if (!email || !validator.isEmail(email)) {
         return badRequest("E-mail inválido");
       }*/
+
+      //Verficar se o E-mail é válido
       const emailIsValid = validator.isEmail(httpRequest.body!.email);
 
       if (!emailIsValid) {
         return badRequest("E-mail inválido");
+      }
+
+      // Validar o nome referente ao ID do referralId
+      const referredByName = httpRequest.body!.referredByName;
+      const referralId = httpRequest.body!.referralId;
+      const isValid =
+        await this.createIndicateRepository.validateReferredByName(
+          referredByName,
+          referralId
+        );
+
+      if (!isValid) {
+        return badRequest(
+          "O nome informado não corresponde ao ID de indicação"
+        );
       }
 
       // Criar a indicação

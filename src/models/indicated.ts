@@ -3,6 +3,7 @@ export interface Indicated {
   name: string;
   email: string;
   phone: string;
+  referredByName: string;
   referralId: number | null;
   indicationDate: string;
   indicationStatus: 1 | 2;
