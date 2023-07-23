@@ -4,7 +4,7 @@ export interface Indicated {
   email: string;
   phone: string;
   referredByName: string;
-  referralId: number | null;
+  referralId: number | null | string;
   indicationDate: string;
   indicationStatus: 1 | 2;
 }

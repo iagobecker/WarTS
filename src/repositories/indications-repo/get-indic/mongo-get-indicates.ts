@@ -15,4 +15,17 @@ export class MongoGetIndicatesRepository implements IGetIndicatesRepository {
       id: _id.toHexString(),
     }));
   }
+
+  async getIndicatesByName(name: string): Promise<Indicated | null> {
+    const indicated = await MongoClient.db
+      .collection<MongoIndicate>("indications")
+      .findOne({ referredByName: name });
+
+    if (!indicated) {
+      return null;
+    }
+
+    const { _id, ...rest } = indicated;
+    return { id: _id.toHexString(), ...rest };
+  }
 }

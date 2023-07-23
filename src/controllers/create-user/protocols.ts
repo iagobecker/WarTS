@@ -5,7 +5,6 @@ export interface CreateUserParams {
   password: string;
   birthday: string;
   cpf: string;
-  referral: string;
   isClient: string;
   pontos: string;
   indicationDate: string;

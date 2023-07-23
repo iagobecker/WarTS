@@ -14,7 +14,7 @@ export class CreateIndicationController implements IController {
   ): Promise<HttpResponse<Indicated | string>> {
     try {
       // Verificar se campos obrigatórios estão presentes
-      const requiredFields = ["name", "email", "phone"];
+      const requiredFields = ["name", "email", "phone", "referralId"];
 
       for (const field of requiredFields) {
         const value = httpRequest.body?.[field as keyof CreateIndicateParams];
@@ -43,21 +43,6 @@ export class CreateIndicationController implements IController {
         return badRequest("E-mail inválido");
       }
 
-      // Validar o nome referente ao ID do referralId
-      const referredByName = httpRequest.body!.referredByName;
-      const referralId = httpRequest.body!.referralId;
-      const isValid =
-        await this.createIndicateRepository.validateReferredByName(
-          referredByName,
-          referralId
-        );
-
-      if (!isValid) {
-        return badRequest(
-          "O nome informado não corresponde ao ID de indicação"
-        );
-      }
-
       // Criar a indicação
       const indication = await this.createIndicateRepository.createIndicate(
         httpRequest.body!
@@ -69,3 +54,15 @@ export class CreateIndicationController implements IController {
     }
   }
 }
+
+/*// Validar o nome referente ao ID do referralId
+      const referredByName = httpRequest.body!.referredByName;
+      const referralId = httpRequest.body!.referralId;
+
+      // Criar a indicação
+      const indication = await this.createIndicateRepository.createIndicate(
+        referredByName,
+        referralId,
+        httpRequest.body!
+      ); */
+        

@@ -17,6 +17,7 @@ import { MongoDeleteUserRepository } from "./repositories/delete-user/mongo-dele
 import { DeleteUserController } from "./controllers/delete-user/delete-user";
 import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
+import { Indicated } from "./models/indicated";
 
 const main = async () => {
   config();
@@ -51,6 +52,39 @@ const main = async () => {
     res.status(statusCode).send(body);
   });
 
+  // Rota para obter indicação por nome da pessoa indicada
+  app.get("/indications/:name", async (req, res) => {
+    const { name } = req.params;
+
+    try {
+      const mongoGetIndicatesRepository = new MongoGetIndicatesRepository();
+
+      const getIndicatesController = new GetIndicatesController(
+        mongoGetIndicatesRepository
+      );
+
+      // Chamar o controlador para obter as indicações
+      const { body, statusCode } = await getIndicatesController.handle();
+
+      // Verificar se 'body' é um array válido antes de acessar suas propriedades
+      const indications = Array.isArray(body) ? body : [];
+
+      // Filtrar a indicação com base no nome da pessoa indicada
+      const indication = indications.find(
+        (indication: Indicated) => indication.name === name
+      );
+
+      if (!indication) {
+        return res.status(statusCode).send("Indicação não encontrada");
+      }
+
+      res.status(200).send(indication);
+    } catch (error) {
+      console.error("Erro ao obter indicação por nome:", error);
+      res.status(500).send("Erro ao obter indicação por nome");
+    }
+  });
+
   //POST /users
   app.post("/users", async (req, res) => {
     const mongoCreateUserRepository = new MongoCreateUserRepository();
@@ -67,23 +101,18 @@ const main = async () => {
   });
 
   //POST /indications
-  app.post("/users/indicates", async (req, res) => {
-    try {
-      const mongoCreateIndicatedRepository =
-        new MongoCreateIndicatedRepository();
+  app.post("/indicates/:id", async (req, res) => {
+    const mongoCreateIndicatedRepository = new MongoCreateIndicatedRepository();
 
-      const createIndicationController = new CreateIndicationController(
-        mongoCreateIndicatedRepository
-      );
+    const createIndicationController = new CreateIndicationController(
+      mongoCreateIndicatedRepository
+    );
 
-      const { body, statusCode } = await createIndicationController.handle({
-        body: req.body,
-      });
+    const { body, statusCode } = await createIndicationController.handle({
+      body: req.body,
+    });
 
-      res.status(statusCode).send(body);
-    } catch (error) {
-      res.status(500).send("Internal Server Error");
-    }
+    res.status(statusCode).send(body);
   });
 
   //PATCH Users

@@ -23,3 +23,10 @@ export const serverError = (): HttpResponse<string> => {
     body: "Algo deu errado.",
   };
 };
+
+export const notFound = (): HttpResponse<string> => {
+  return {
+    statusCode: HttpStatusCode.SERVER_ERROR,
+    body: "Usuário não encontrado",
+  };
+};

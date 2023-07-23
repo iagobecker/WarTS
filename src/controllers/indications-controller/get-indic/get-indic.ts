@@ -12,7 +12,10 @@ export class GetIndicatesController implements IController {
     try {
       const indications = await this.getIndicatesRepository.getIndicates();
 
-      return ok<Indicated[]>(indications);
+      const indicateObject = { indications };
+
+      return ok<Indicated[]>(indicateObject);
+      //return ok<Indicated[]>(indications);
     } catch (error) {
       return serverError();
     }
