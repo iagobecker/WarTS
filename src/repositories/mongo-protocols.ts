@@ -7,3 +7,8 @@ export type MongoUser = Omit<User, "id">;
 import { Indicated } from "../models/indicated";
 
 export type MongoIndicate = Omit<Indicated, "id">;
+
+//Login
+import { Logi } from "../models/login";
+
+export type MongoLogi = Omit<Logi, "id">;

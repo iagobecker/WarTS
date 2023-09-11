@@ -1,3 +1,4 @@
+import { CreateLogiController } from "./controllers/login-controller/create/create";
 import { DeleteIndicatesController } from "./controllers/indications-controller/delete-indic/delete-indic";
 import { MongoDeleteIndicatesRepository } from "./repositories/indications-repo/delete-indic/mongo-delete-indic";
 import { UpdateIndicatesController } from "./controllers/indications-controller/update-indic/update-indic";
@@ -18,6 +19,9 @@ import { DeleteUserController } from "./controllers/delete-user/delete-user";
 import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
 import { Indicated } from "./models/indicated";
+import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
+import { Auth } from "./middlewares/auth";
+import { Router } from "express";
 
 const main = async () => {
   config();
@@ -109,6 +113,21 @@ const main = async () => {
     );
 
     const { body, statusCode } = await createIndicationController.handle({
+      body: req.body,
+    });
+
+    res.status(statusCode).send(body);
+  });
+
+  //POST Login
+  app.post("/login", Auth.private, async (req, res) => {
+    const mongoCreateLogiRepository = new MongoCreateLogiRepository();
+
+    const createLogiController = new CreateLogiController(
+      mongoCreateLogiRepository
+    );
+
+    const { body, statusCode } = await createLogiController.handle({
       body: req.body,
     });
 
