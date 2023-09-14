@@ -21,7 +21,7 @@ import { CreateIndicationController } from "./controllers/indications-controller
 import { Indicated } from "./models/indicated";
 import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
 import { Auth } from "./middlewares/auth";
-import { Router } from "express";
+//import { Router } from "express";
 
 const main = async () => {
   config();

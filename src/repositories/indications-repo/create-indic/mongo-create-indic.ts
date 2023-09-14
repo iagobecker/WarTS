@@ -1,3 +1,5 @@
+//-------------------------------------------------------------------------
+
 import { MongoIndicate } from "./../../mongo-protocols";
 import {
   ICreateIndicateRepository,
@@ -29,6 +31,8 @@ export class MongoCreateIndicatedRepository
     // Retornar a indicação criada e substituir o id com "_" (underscore) por "id" (sem "_")
     return { id: _id.toHexString(), ...rest };
   }
+
+  //-------------------
 
   /*async validateReferredByName(
     referredByName: string,

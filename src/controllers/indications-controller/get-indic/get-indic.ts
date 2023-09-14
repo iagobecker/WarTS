@@ -8,14 +8,14 @@ export class GetIndicatesController implements IController {
     private readonly getIndicatesRepository: IGetIndicatesRepository
   ) {}
 
-  async handle(): Promise<HttpResponse<Indicated[] | string>> {
+  async handle(): Promise<HttpResponse<Indicated | string>> {
     try {
       const indications = await this.getIndicatesRepository.getIndicates();
 
-      const indicateObject = { indications };
+      //const indicateObject = { indications };
 
-      return ok<Indicated[]>(indicateObject);
-      //return ok<Indicated[]>(indications);
+      //return ok<Indicated[]>(indicateObject);
+      return ok<Indicated>(indications);
     } catch (error) {
       return serverError();
     }
