@@ -7,11 +7,6 @@ import { cpf } from "cpf-cnpj-validator";
 
 ///------
 
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-
-dotenv.config();
-
 export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
@@ -20,7 +15,14 @@ export class CreateUserController implements IController {
   ): Promise<HttpResponse<User | string>> {
     try {
       //verificar se campos obrigatórios estão presentes
-      const requiredFields = ["name", "email", "password", "birthday", "cpf"];
+      const requiredFields = [
+        "name",
+        "email",
+        "phone",
+        "password",
+        "birthday",
+        "cpf",
+      ];
 
       for (const field of requiredFields) {
         if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
@@ -68,16 +70,9 @@ export class CreateUserController implements IController {
 
       ///----------------------------------------------------
 
-      // Gere um token JWT
-      const token = jwt.sign(
-        { id: user.id, email: user.email },
-        process.env.JWT_SECRET_KEY as string,
-        { expiresIn: "2h" }
-      );
-
       // Retorna o usuário e o token JWT
 
-      return created<User>({ user, token });
+      return created<User>(user);
     } catch (error) {
       return serverError();
     }

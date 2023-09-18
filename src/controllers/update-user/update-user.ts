@@ -22,7 +22,7 @@ export class UpdateUserController implements IController {
       }
 
       const allowedFieldsToUpdate: /*Campos permitidos para atualizar */ (keyof UpdateUserParams)[] =
-        ["name", "password"];
+        ["name", "password", "email", "phone", "birthday", "cpf"];
 
       const someFieldIsNotAllowedToUpdate /*algum campo não tem permissão para atualizar */ =
         Object.keys(body).some(

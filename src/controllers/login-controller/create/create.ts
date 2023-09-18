@@ -3,10 +3,12 @@ import { HttpRequest, HttpResponse, IController } from "./../../protocols";
 import { Logi } from "./../../../models/login";
 import { CreateLogiParams, ICreateLogiRepository } from "./protocols";
 import validator from "validator";
-import JWT from "jsonwebtoken";
+
 import dotenv from "dotenv";
 import { Request, Response } from "express";
 import { User } from "../../../models/user";
+
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -46,7 +48,14 @@ export class CreateLogiController implements IController {
         httpRequest.body!
       );
 
-      return created<Logi>(login);
+      // Gere um token JWT
+      const token = jwt.sign(
+        { id: login.id, email: login.email },
+        process.env.JWT_SECRET_KEY as string,
+        { expiresIn: "2h" }
+      );
+
+      return created<Logi>({ login, token });
     } catch (error) {
       return serverError();
     }

@@ -5,6 +5,7 @@ export interface UpdateUserParams {
   name?: string;
   password?: string;
   email?: string;
+  phone?: string;
   birthday?: string;
   cpf?: string;
   referral?: string;
