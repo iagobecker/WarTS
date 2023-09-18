@@ -1,7 +1,6 @@
 import { Logi } from "../../../models/login";
 
 export interface CreateLogiParams {
-  id: string;
   email: string;
   password: string;
 }

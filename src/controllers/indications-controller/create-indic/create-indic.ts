@@ -14,7 +14,7 @@ export class CreateIndicationController implements IController {
   ): Promise<HttpResponse<Indicated | string>> {
     try {
       // Verificar se campos obrigatórios estão presentes
-      const requiredFields = ["name", "email", "phone", "referralId"];
+      const requiredFields = ["name", "email", "phone"];
 
       for (const field of requiredFields) {
         const value = httpRequest.body?.[field as keyof CreateIndicateParams];
@@ -65,4 +65,3 @@ export class CreateIndicationController implements IController {
         referralId,
         httpRequest.body!
       ); */
-        

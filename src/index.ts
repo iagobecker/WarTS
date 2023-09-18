@@ -22,6 +22,12 @@ import { Indicated } from "./models/indicated";
 import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
 import { Auth } from "./middlewares/auth";
 //import { Router } from "express";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import { MongoCreateRecomRepository } from "./repositories/Recompensa-Repo/create-Recom/mongo-create-recom";
+import { CreateRecomController } from "./controllers/recompensas-Controller/create-Recom/create-reco";
+
+dotenv.config();
 
 const main = async () => {
   config();
@@ -70,6 +76,9 @@ const main = async () => {
       // Chamar o controlador para obter as indicações
       const { body, statusCode } = await getIndicatesController.handle();
 
+      if (statusCode !== 200) {
+        return res.status(statusCode).send(body);
+      }
       // Verificar se 'body' é um array válido antes de acessar suas propriedades
       const indications = Array.isArray(body) ? body : [];
 
@@ -105,7 +114,7 @@ const main = async () => {
   });
 
   //POST /indications
-  app.post("/indicates/:id", async (req, res) => {
+  app.post("/indicates", async (req, res) => {
     const mongoCreateIndicatedRepository = new MongoCreateIndicatedRepository();
 
     const createIndicationController = new CreateIndicationController(
@@ -119,6 +128,36 @@ const main = async () => {
     res.status(statusCode).send(body);
   });
 
+  ///-----------------------
+
+  /*// Rota para autenticação de usuário (login)
+app.post('/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // Verifique se o email e a senha correspondem a um usuário válido no banco de dados
+    const user = await getUserFromDatabase(email, password);
+
+    if (!user) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+
+    // Gere um token JWT com as informações do usuário
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET_KEY as string,
+      { expiresIn: '2h' }
+    );
+
+    res.status(200).json({ token });
+  } catch (error) {
+    console.error('Erro durante o login:', error);
+    res.status(500).json({ message: 'Erro durante o login' });
+  }
+});
+
+*/
+
   //POST Login
   app.post("/login", Auth.private, async (req, res) => {
     const mongoCreateLogiRepository = new MongoCreateLogiRepository();
@@ -128,6 +167,21 @@ const main = async () => {
     );
 
     const { body, statusCode } = await createLogiController.handle({
+      body: req.body,
+    });
+
+    res.status(statusCode).send(body);
+  });
+
+  //POST Recompensa
+  app.post("/recompensa", async (req, res) => {
+    const mongoCreateRecomRepository = new MongoCreateRecomRepository();
+
+    const createRecomController = new CreateRecomController(
+      mongoCreateRecomRepository
+    );
+
+    const { body, statusCode } = await createRecomController.handle({
       body: req.body,
     });
 

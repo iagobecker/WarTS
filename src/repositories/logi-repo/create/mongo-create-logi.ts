@@ -23,8 +23,8 @@ export class MongoCreateLogiRepository implements ICreateLogiRepository {
     }
 
     const { _id, ...rest } = login;
-    return { email: rest.email, password: rest.password };
+    //return { email: rest.email, password: rest.password };
 
-    //return { id: _id.toHexString(), ...rest };
+    return { id: _id.toHexString(), ...rest };
   }
 }

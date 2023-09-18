@@ -5,6 +5,13 @@ import { CreateUserParams, ICreateUserRepository } from "./protocols";
 import { badRequest, created, serverError } from "../helpers";
 import { cpf } from "cpf-cnpj-validator";
 
+///------
+
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config();
+
 export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
@@ -59,7 +66,18 @@ export class CreateUserController implements IController {
         httpRequest.body!
       );
 
-      return created<User>(user);
+      ///----------------------------------------------------
+
+      // Gere um token JWT
+      const token = jwt.sign(
+        { id: user.id, email: user.email },
+        process.env.JWT_SECRET_KEY as string,
+        { expiresIn: "2h" }
+      );
+
+      // Retorna o usuário e o token JWT
+
+      return created<User>({ user, token });
     } catch (error) {
       return serverError();
     }
