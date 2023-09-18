@@ -1,3 +1,7 @@
+import { DeleteRecomController } from "./controllers/recompensas-Controller/delete-recom/delete-recom";
+import { MongoDeleteRecomRepository } from "./repositories/Recompensa-Repo/delete-Recom/mongo-delete-recom";
+import { UpdateRecomController } from "./controllers/recompensas-Controller/update-Recom/update-recom";
+import { MongoUpdateRecomRepository } from "./repositories/Recompensa-Repo/update-Recom/mongo-update-recom";
 import { CreateLogiController } from "./controllers/login-controller/create/create";
 import { DeleteIndicatesController } from "./controllers/indications-controller/delete-indic/delete-indic";
 import { MongoDeleteIndicatesRepository } from "./repositories/indications-repo/delete-indic/mongo-delete-indic";
@@ -26,6 +30,8 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { MongoCreateRecomRepository } from "./repositories/Recompensa-Repo/create-Recom/mongo-create-recom";
 import { CreateRecomController } from "./controllers/recompensas-Controller/create-Recom/create-reco";
+import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Recom/mongo-get-recom";
+import { GetRecomController } from "./controllers/recompensas-Controller/get-Recom/get-reco";
 
 dotenv.config();
 
@@ -96,6 +102,17 @@ const main = async () => {
       console.error("Erro ao obter indicação por nome:", error);
       res.status(500).send("Erro ao obter indicação por nome");
     }
+  });
+
+  //GET Recompensas
+  app.get("/recompensas", async (req, res) => {
+    const mongoGetRecomRepository = new MongoGetRecomRepository();
+
+    const getRecomController = new GetRecomController(mongoGetRecomRepository);
+
+    const { body, statusCode } = await getRecomController.handle();
+
+    res.status(statusCode).send(body);
   });
 
   //POST /users
@@ -220,6 +237,22 @@ app.post('/login', async (req, res) => {
     res.status(statusCode).send(body);
   });
 
+  //PATCH Recompensa
+  app.patch("/recompensa/:id", async (req, res) => {
+    const mongoUpdateRecomRepository = new MongoUpdateRecomRepository();
+
+    const updateRecomController = new UpdateRecomController(
+      mongoUpdateRecomRepository
+    );
+
+    const { body, statusCode } = await updateRecomController.handle({
+      body: req.body,
+      params: req.params,
+    });
+
+    res.status(statusCode).send(body);
+  });
+
   //Delete user
   app.delete("/users/:id", async (req, res) => {
     const mongoDeleteUserRepository = new MongoDeleteUserRepository();
@@ -244,6 +277,21 @@ app.post('/login', async (req, res) => {
     );
 
     const { body, statusCode } = await deleteIndicatesController.handle({
+      params: req.params,
+    });
+
+    res.status(statusCode).send(body);
+  });
+
+  //Delete Recompensa
+  app.delete("/recompensa/:id", async (req, res) => {
+    const mongoDeleteRecomRepository = new MongoDeleteRecomRepository();
+
+    const deleteRecomController = new DeleteRecomController(
+      mongoDeleteRecomRepository
+    );
+
+    const { body, statusCode } = await deleteRecomController.handle({
       params: req.params,
     });
 
