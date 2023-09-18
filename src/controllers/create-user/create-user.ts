@@ -5,7 +5,7 @@ import { CreateUserParams, ICreateUserRepository } from "./protocols";
 import { badRequest, created, serverError } from "../helpers";
 import { cpf } from "cpf-cnpj-validator";
 
-///------
+///-------------------
 
 export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
