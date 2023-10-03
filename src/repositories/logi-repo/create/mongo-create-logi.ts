@@ -10,12 +10,12 @@ export class MongoCreateLogiRepository implements ICreateLogiRepository {
   async createLogi(params: CreateLogiParams): Promise<Logi> {
     //criando Login
     const { insertedId } = await MongoClient.db
-      .collection("login")
+      .collection("users")
       .insertOne(params);
 
     //buscando login & verificando se foi criado
     const login = await MongoClient.db
-      .collection<MongoLogi>("login")
+      .collection<MongoLogi>("users")
       .findOne({ _id: insertedId });
     //erro caso não tenha sido criado/encontrado
     if (!login) {

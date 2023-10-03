@@ -5,8 +5,6 @@ import { CreateUserParams, ICreateUserRepository } from "./protocols";
 import { badRequest, created, serverError } from "../helpers";
 import { cpf } from "cpf-cnpj-validator";
 
-///-------------------
-
 export class CreateUserController implements IController {
   constructor(private readonly createUserRepository: ICreateUserRepository) {}
 
@@ -15,14 +13,7 @@ export class CreateUserController implements IController {
   ): Promise<HttpResponse<User | string>> {
     try {
       //verificar se campos obrigatórios estão presentes
-      const requiredFields = [
-        "name",
-        "email",
-        "phone",
-        "password",
-        "birthday",
-        "cpf",
-      ];
+      const requiredFields = ["name", "email", "password"];
 
       for (const field of requiredFields) {
         if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
@@ -67,10 +58,6 @@ export class CreateUserController implements IController {
       const user = await this.createUserRepository.createUser(
         httpRequest.body!
       );
-
-      ///----------------------------------------------------
-
-      // Retorna o usuário e o token JWT
 
       return created<User>(user);
     } catch (error) {

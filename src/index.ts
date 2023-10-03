@@ -24,14 +24,33 @@ import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
 import { Indicated } from "./models/indicated";
 import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
-import { Auth } from "./middlewares/auth";
+//import { Auth } from "./middlewares/auth";
 //import { Router } from "express";
-import jwt from "jsonwebtoken";
+//import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { MongoCreateRecomRepository } from "./repositories/Recompensa-Repo/create-Recom/mongo-create-recom";
 import { CreateRecomController } from "./controllers/recompensas-Controller/create-Recom/create-reco";
 import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Recom/mongo-get-recom";
 import { GetRecomController } from "./controllers/recompensas-Controller/get-Recom/get-reco";
+import { Router } from "express";
+//-----
+import { hash } from "bcryptjs";
+import { AuthMiddlewares } from "./middlewares/auth";
+//import { AuthController } from "./controllers/AuthController";
+
+//const authController = new AuthController();
+
+export const router = Router();
+
+//import axios from "axios";
+import bodyParser from "body-parser";
+
+//-----
+
+//imports envio de WhatsApp
+import Sender from "./whats-bot/sender";
+
+import * as EmailController from "./emailController/emailController";
 
 dotenv.config();
 
@@ -39,7 +58,11 @@ const main = async () => {
   config();
 
   const app = express();
+  //----------------
+  //const sender = new Sender();
+  app.use(express.urlencoded({ extended: false }));
 
+  app.use(bodyParser.json());
   app.use(express.json());
 
   await MongoClient.connect();
@@ -56,7 +79,7 @@ const main = async () => {
   });
 
   //GET Indicates
-  app.get("/indications", async (req, res) => {
+  app.get("/indications", AuthMiddlewares, async (req, res) => {
     const mongoGetIndicatesRepository = new MongoGetIndicatesRepository();
 
     const getIndicatesController = new GetIndicatesController(
@@ -105,7 +128,7 @@ const main = async () => {
   });
 
   //GET Recompensas
-  app.get("/recompensas", async (req, res) => {
+  app.get("/recompensas", AuthMiddlewares, async (req, res) => {
     const mongoGetRecomRepository = new MongoGetRecomRepository();
 
     const getRecomController = new GetRecomController(mongoGetRecomRepository);
@@ -131,16 +154,69 @@ const main = async () => {
   });
 
   //POST /indications
-  app.post("/indicates", async (req, res) => {
+  app.post("/indications", async (req, res) => {
     const mongoCreateIndicatedRepository = new MongoCreateIndicatedRepository();
 
     const createIndicationController = new CreateIndicationController(
       mongoCreateIndicatedRepository
     );
+    EmailController.contato;
 
     const { body, statusCode } = await createIndicationController.handle({
       body: req.body,
     });
+
+    ///MANDANDO ZAP ZAP
+    /* const { phone } = req.body;
+    try {
+      await sender.sendText(
+        phone,
+        "Olá mister, estou te recomendando este negócio incrível"
+      );
+      return res.status(200).json();
+    } catch (error) {
+      console.error("error", error);
+    }*/
+
+    /*app.get("/status", (req, res) => {
+      return res.send({
+        qr_code: sender.qrCode,
+        connected: sender.isConnected,
+      });
+    });*/
+
+    //----------------------
+
+    /* if (req.body.phone) {
+      // Substitua 'Instance_token' pelo token real da API
+      const instanceToken = "Instance_token";
+
+      // URL correta para enviar mensagens via Ultramsg API
+      const ultramsgUrl = "https://api.ultramsg.com/instance1150/messages/chat";
+
+      try {
+        const response = await axios.post(ultramsgUrl, {
+          token: instanceToken,
+          to: req.body.phone,
+          body: "Olá mister, estou te recomendando este negócio incrível",
+          priority: "10",
+          referenceId: "",
+        });
+
+        // Verifique a resposta da API e aja de acordo
+        if (response.status === 200) {
+          console.log("Mensagem de WhatsApp enviada com sucesso.");
+        } else {
+          console.error("Erro ao enviar mensagem de WhatsApp:", response.data);
+        }
+      } catch (error) {
+        console.error("Erro ao enviar mensagem de WhatsApp:", error);
+      }
+    } else {
+      console.error("Número de telefone não fornecido na solicitação.");
+    }*/
+
+    //------------------------
 
     res.status(statusCode).send(body);
   });
@@ -176,7 +252,7 @@ app.post('/login', async (req, res) => {
 */
 
   //POST Login
-  app.post("/login", Auth.private, async (req, res) => {
+  app.post("/login", async (req, res) => {
     const mongoCreateLogiRepository = new MongoCreateLogiRepository();
 
     const createLogiController = new CreateLogiController(
@@ -186,6 +262,20 @@ app.post('/login', async (req, res) => {
     const { body, statusCode } = await createLogiController.handle({
       body: req.body,
     });
+
+    res.status(statusCode).send(body);
+  });
+
+  //POST Auth
+  // router.post("/auth", authController.authenticate);
+
+  //GET Login
+  app.get("/login", async (req, res) => {
+    const mongoGetUsersRepository = new MongoGetUsersRepository();
+
+    const getUsersController = new GetUsersController(mongoGetUsersRepository);
+
+    const { body, statusCode } = await getUsersController.handle();
 
     res.status(statusCode).send(body);
   });
