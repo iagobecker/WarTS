@@ -13,11 +13,18 @@ export class CreateUserController implements IController {
   ): Promise<HttpResponse<User | string>> {
     try {
       //verificar se campos obrigatórios estão presentes
-      const requiredFields = ["name", "email", "password"];
+      const requiredFields = ["name", "email", "password", "isAdmin"];
 
       for (const field of requiredFields) {
-        if (!httpRequest?.body?.[field as keyof CreateUserParams]?.length) {
-          //validar se o body existe
+        // Obter o valor do campo
+        const fieldValue = httpRequest?.body?.[field as keyof CreateUserParams];
+
+        // Verificar se o campo existe, é uma string e, se for, se tem comprimento
+        if (
+          fieldValue === undefined ||
+          (typeof fieldValue === "string" && fieldValue.length === 0)
+        ) {
+          // Validar se o campo é obrigatório
           return badRequest(`Campo ${field} obrigatório`);
         }
       }

@@ -34,20 +34,11 @@ class Sender {
     }
   }
 
-  async sendLinkPreview(to: string, url: string, caption: string) {
-    if (this.client) {
-      const result = await this.client.sendLinkPreview(to, url, caption);
-      return result;
-    } else {
-      console.error("Cliente não está definido");
-      return null;
-    }
-  }
-
   private initialize() {
     const qr = (
       base64Qr: string,
-
+      //urlCode: string,
+      //asciiQR: number,
       attempts: number
     ) => {
       this.qr = { base64Qr, attempts };

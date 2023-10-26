@@ -48,7 +48,7 @@ import bodyParser from "body-parser";
 //-----
 
 //imports envio de WhatsApp
-import Sender from "./whats-bot/sender";
+//import Sender from "./whats-bot/sender";
 
 import * as EmailController from "./emailController/emailController";
 
@@ -59,7 +59,7 @@ const main = async () => {
 
   const app = express();
   //----------------
-  const sender = new Sender();
+  //const sender = new Sender();
   app.use(express.urlencoded({ extended: false }));
 
   app.use(bodyParser.json());
@@ -68,7 +68,7 @@ const main = async () => {
   await MongoClient.connect();
 
   //GET Users
-  app.get("/users", async (req, res) => {
+  app.get("/users", AuthMiddlewares, async (req, res) => {
     const mongoGetUsersRepository = new MongoGetUsersRepository();
 
     const getUsersController = new GetUsersController(mongoGetUsersRepository);
@@ -167,7 +167,7 @@ const main = async () => {
     });
 
     ///MANDANDO ZAP ZAP
-    const { phone } = req.body;
+    /*  const { phone } = req.body;
     try {
       await sender.sendText(
         phone,
@@ -180,10 +180,10 @@ const main = async () => {
 
     app.get("/status", (req, res) => {
       return res.send({
-        qr_code: sender.qrCode,
+        // qr_code: sender.qrCode,
         connected: sender.isConnected,
       });
-    });
+    });*/
 
     res.status(statusCode).send(body);
   });
@@ -273,19 +273,8 @@ app.post('/login', async (req, res) => {
   //POST Auth
   // router.post("/auth", authController.authenticate);
 
-  //GET Login
-  app.get("/login", async (req, res) => {
-    const mongoGetUsersRepository = new MongoGetUsersRepository();
-
-    const getUsersController = new GetUsersController(mongoGetUsersRepository);
-
-    const { body, statusCode } = await getUsersController.handle();
-
-    res.status(statusCode).send(body);
-  });
-
   //POST Recompensa
-  app.post("/recompensa", async (req, res) => {
+  app.post("/recompensa", AuthMiddlewares, async (req, res) => {
     const mongoCreateRecomRepository = new MongoCreateRecomRepository();
 
     const createRecomController = new CreateRecomController(
@@ -316,7 +305,7 @@ app.post('/login', async (req, res) => {
   });
 
   //PATCH Indications
-  app.patch("/indications/:id", async (req, res) => {
+  app.patch("/indications/:id", AuthMiddlewares, async (req, res) => {
     const mongoUpdateIndicatesRepository = new MongoUpdateIndicatesRepository();
 
     const updateIndicatesController = new UpdateIndicatesController(
@@ -332,7 +321,7 @@ app.post('/login', async (req, res) => {
   });
 
   //PATCH Recompensa
-  app.patch("/recompensa/:id", async (req, res) => {
+  app.patch("/recompensa/:id", AuthMiddlewares, async (req, res) => {
     const mongoUpdateRecomRepository = new MongoUpdateRecomRepository();
 
     const updateRecomController = new UpdateRecomController(
@@ -348,7 +337,7 @@ app.post('/login', async (req, res) => {
   });
 
   //Delete user
-  app.delete("/users/:id", async (req, res) => {
+  app.delete("/users/:id", AuthMiddlewares, async (req, res) => {
     const mongoDeleteUserRepository = new MongoDeleteUserRepository();
 
     const deleteUserController = new DeleteUserController(
@@ -363,7 +352,7 @@ app.post('/login', async (req, res) => {
   });
 
   //Delete Indication
-  app.delete("/indications/:id", async (req, res) => {
+  app.delete("/indications/:id", AuthMiddlewares, async (req, res) => {
     const mongoDeleteIndicatesRepository = new MongoDeleteIndicatesRepository();
 
     const deleteIndicatesController = new DeleteIndicatesController(
@@ -378,7 +367,7 @@ app.post('/login', async (req, res) => {
   });
 
   //Delete Recompensa
-  app.delete("/recompensa/:id", async (req, res) => {
+  app.delete("/recompensa/:id", AuthMiddlewares, async (req, res) => {
     const mongoDeleteRecomRepository = new MongoDeleteRecomRepository();
 
     const deleteRecomController = new DeleteRecomController(

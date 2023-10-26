@@ -6,6 +6,7 @@ export interface User {
   password: string;
   birthday: string;
   cpf: string;
+  isAdmin: boolean;
   isClient: string;
   pontos: string;
   indicationDate: string;
