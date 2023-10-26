@@ -34,6 +34,16 @@ class Sender {
     }
   }
 
+  async sendLinkPreview(to: string, url: string, caption: string) {
+    if (this.client) {
+      const result = await this.client.sendLinkPreview(to, url, caption);
+      return result;
+    } else {
+      console.error("Cliente não está definido");
+      return null;
+    }
+  }
+
   private initialize() {
     const qr = (
       base64Qr: string,
@@ -67,10 +77,10 @@ class Sender {
       });
 
       //código a baixo envia a MSG
-      /* this.sendText(
+      this.sendText(
         "555599293516@c.us",
-        "Olá mister, estou te recomendando este negócio incrível"
-      );*/
+        "Olá Thalis, estou te recomendando este negócio incrível"
+      );
     };
 
     create({ session: "whats-indicate" })

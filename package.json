@@ -11,7 +11,6 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
-    "@types/bcryptjs": "^2.4.4",
     "@types/cors": "^2.8.14",
     "@types/dotenv": "^8.2.0",
     "@types/express": "^4.17.17",
@@ -33,7 +32,6 @@
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "cpf-cnpj-validator": "^1.0.3",
@@ -48,6 +46,7 @@
     "pg-hstore": "^2.3.4",
     "reflect-metadata": "^0.1.13",
     "sequelize": "^6.33.0",
+    "twilio": "^4.19.0",
     "typeorm": "^0.3.17",
     "validator": "^13.9.0",
     "venom-bot": "^5.0.21"

@@ -34,7 +34,7 @@ import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Reco
 import { GetRecomController } from "./controllers/recompensas-Controller/get-Recom/get-reco";
 import { Router } from "express";
 //-----
-import { hash } from "bcryptjs";
+
 import { AuthMiddlewares } from "./middlewares/auth";
 //import { AuthController } from "./controllers/AuthController";
 
@@ -59,7 +59,7 @@ const main = async () => {
 
   const app = express();
   //----------------
-  //const sender = new Sender();
+  const sender = new Sender();
   app.use(express.urlencoded({ extended: false }));
 
   app.use(bodyParser.json());
@@ -167,7 +167,7 @@ const main = async () => {
     });
 
     ///MANDANDO ZAP ZAP
-    /* const { phone } = req.body;
+    const { phone } = req.body;
     try {
       await sender.sendText(
         phone,
@@ -176,18 +176,21 @@ const main = async () => {
       return res.status(200).json();
     } catch (error) {
       console.error("error", error);
-    }*/
+    }
 
-    /*app.get("/status", (req, res) => {
+    app.get("/status", (req, res) => {
       return res.send({
         qr_code: sender.qrCode,
         connected: sender.isConnected,
       });
-    });*/
+    });
 
-    //----------------------
+    res.status(statusCode).send(body);
+  });
 
-    /* if (req.body.phone) {
+  //----------------------
+
+  /* if (req.body.phone) {
       // Substitua 'Instance_token' pelo token real da API
       const instanceToken = "Instance_token";
 
@@ -216,10 +219,7 @@ const main = async () => {
       console.error("Número de telefone não fornecido na solicitação.");
     }*/
 
-    //------------------------
-
-    res.status(statusCode).send(body);
-  });
+  //------------------------
 
   ///-----------------------
 
@@ -250,6 +250,10 @@ app.post('/login', async (req, res) => {
 });
 
 */
+
+  //---------------------------
+
+  //------------------------------
 
   //POST Login
   app.post("/login", async (req, res) => {
