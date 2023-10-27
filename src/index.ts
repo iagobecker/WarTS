@@ -48,7 +48,7 @@ import bodyParser from "body-parser";
 //-----
 
 //imports envio de WhatsApp
-//import Sender from "./whats-bot/sender";
+import Sender from "./whats-bot/sender";
 
 import * as EmailController from "./emailController/emailController";
 
@@ -59,7 +59,7 @@ const main = async () => {
 
   const app = express();
   //----------------
-  //const sender = new Sender();
+  const sender = new Sender();
   app.use(express.urlencoded({ extended: false }));
 
   app.use(bodyParser.json());
@@ -68,7 +68,7 @@ const main = async () => {
   await MongoClient.connect();
 
   //GET Users
-  app.get("/users", AuthMiddlewares, async (req, res) => {
+  app.get("/users", async (req, res) => {
     const mongoGetUsersRepository = new MongoGetUsersRepository();
 
     const getUsersController = new GetUsersController(mongoGetUsersRepository);
@@ -167,59 +167,51 @@ const main = async () => {
     });
 
     ///MANDANDO ZAP ZAP
-    /*  const { phone } = req.body;
+    const { phone, name } = req.body;
+
     try {
-      await sender.sendText(
-        phone,
-        "Olá mister, estou te recomendando este negócio incrível"
-      );
+      //validar e transformar phone Whatsapp
+      await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
+
+      //"555599293516@c.us",
+      //"Olá Thalis, estou te recomendando este negócio incrível"
+
+      //`Olá ${name}, seja bem vindo!`
+
       return res.status(200).json();
     } catch (error) {
       console.error("error", error);
+      res.status(500).json({ status: "error", message: error });
     }
 
-    app.get("/status", (req, res) => {
-      return res.send({
-        // qr_code: sender.qrCode,
-        connected: sender.isConnected,
-      });
+    /*app.post("/indications", async (req, res) => {
+      const { phone, name } = req.body;
+
+      try {
+        //validar e transformar phone Whatsapp
+        await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
+
+        //"555599293516@c.us",
+        //"Olá Thalis, estou te recomendando este negócio incrível"
+
+        //`Olá ${name}, seja bem vindo!`
+
+        return res.status(200).json();
+      } catch (error) {
+        console.error("error", error);
+        res.status(500).json({ status: "error", message: error });
+      }
     });*/
 
     res.status(statusCode).send(body);
   });
 
-  //----------------------
-
-  /* if (req.body.phone) {
-      // Substitua 'Instance_token' pelo token real da API
-      const instanceToken = "Instance_token";
-
-      // URL correta para enviar mensagens via Ultramsg API
-      const ultramsgUrl = "https://api.ultramsg.com/instance1150/messages/chat";
-
-      try {
-        const response = await axios.post(ultramsgUrl, {
-          token: instanceToken,
-          to: req.body.phone,
-          body: "Olá mister, estou te recomendando este negócio incrível",
-          priority: "10",
-          referenceId: "",
-        });
-
-        // Verifique a resposta da API e aja de acordo
-        if (response.status === 200) {
-          console.log("Mensagem de WhatsApp enviada com sucesso.");
-        } else {
-          console.error("Erro ao enviar mensagem de WhatsApp:", response.data);
-        }
-      } catch (error) {
-        console.error("Erro ao enviar mensagem de WhatsApp:", error);
-      }
-    } else {
-      console.error("Número de telefone não fornecido na solicitação.");
-    }*/
-
-  //------------------------
+  app.get("/status", (req, res) => {
+    return res.send({
+      qr_code: sender.qrCode,
+      connected: sender.isConnected,
+    });
+  });
 
   ///-----------------------
 

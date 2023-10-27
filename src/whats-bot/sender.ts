@@ -1,10 +1,10 @@
+import parsePhoneNumber, { isValidPhoneNumber } from "libphonenumber-js";
 import { create, Whatsapp, Message, SocketState } from "venom-bot";
-import { start } from "repl";
-import { type } from "os";
 
 export type QRCode = {
   base64Qr: string;
   attempts: number;
+  asciiQR: string;
 };
 
 //Envio WhatsApp
@@ -12,6 +12,7 @@ class Sender {
   private client: Whatsapp;
   private connected: boolean;
   private qr: QRCode;
+  private status: string;
 
   get isConnected(): boolean {
     return this.connected;
@@ -21,27 +22,39 @@ class Sender {
     return this.qr;
   }
 
+  //Este método Construtor chama o método initialize
   constructor() {
     this.initialize();
   }
 
   async sendText(to: string, body: string) {
-    // 555591003912@c.us
+    // 555591003912@c.us ---- o "to" é o phone
+    if (!isValidPhoneNumber(to, "BR")) {
+      throw new Error("Esse número não é válido");
+    }
+
+    //Formata o número para receber o +55 do Brasil e tirar o "+", e receber o @c.us para usar a API
+    let phoneNumber = parsePhoneNumber(to, "BR")
+      ?.format("E.164")
+      .replace("+", "") as string;
+
+    phoneNumber = phoneNumber.includes("@c.us")
+      ? phoneNumber
+      : `${phoneNumber}@c.us`;
+
+    console.log("phoneNumber", phoneNumber);
+
     if (this.client) {
-      await this.client.sendText(to, body);
+      await this.client.sendText(phoneNumber, body);
     } else {
       console.error("Cliente não está definido");
     }
   }
 
+  //Cria o VenomBot e associa a propriedade Sender client
   private initialize() {
-    const qr = (
-      base64Qr: string,
-      //urlCode: string,
-      //asciiQR: number,
-      attempts: number
-    ) => {
-      this.qr = { base64Qr, attempts };
+    const qr = (base64Qr: string, attempts: number, asciiQR: string) => {
+      this.qr = { base64Qr, attempts, asciiQR };
       //console.log("base64 image string qrcode: ", base64Qrimg);
     };
 
@@ -55,7 +68,6 @@ class Sender {
       this.connected = ["isLogged", "qrReadSuccess", "chatsAvailable"].includes(
         statusSession
       );
-
       //console.log("Status Session: ", statusSession);
       //console.log("Session name: ", session);
     };
@@ -66,12 +78,6 @@ class Sender {
       client.onStateChange((state) => {
         this.connected = state === SocketState.CONNECTED;
       });
-
-      //código a baixo envia a MSG
-      this.sendText(
-        "555599293516@c.us",
-        "Olá Thalis, estou te recomendando este negócio incrível"
-      );
     };
 
     create({ session: "whats-indicate" })
