@@ -1,8 +1,9 @@
 import parsePhoneNumber, { isValidPhoneNumber } from "libphonenumber-js";
-import { create, Whatsapp, Message, SocketState } from "venom-bot";
+import { create, Whatsapp, SocketState } from "venom-bot";
+import qrcode from "qrcode";
 
 export type QRCode = {
-  base64Qr: string;
+  base64Qrimg: string;
   attempts: number;
   asciiQR: string;
 };
@@ -52,24 +53,23 @@ class Sender {
   }
 
   //Cria o VenomBot e associa a propriedade Sender client
+  private async generateQRCode(text: string): Promise<string> {
+    try {
+      return await qrcode.toDataURL(text);
+    } catch (error) {
+      throw new Error("Erro ao gerar QR Code: " + error);
+    }
+  }
+
   private initialize() {
-    const qr = (base64Qr: string, attempts: number, asciiQR: string) => {
-      this.qr = { base64Qr, attempts, asciiQR };
-      //console.log("base64 image string qrcode: ", base64Qrimg);
+    const qr = (base64Qrimg: string, attempts: number, asciiQR: string) => {
+      this.qr = { base64Qrimg, attempts, asciiQR };
     };
 
     const status = (statusSession: string, session: string) => {
-      //return isLogged || notLogged || browserClose || qrReadSuccess || qrReadFail
-      // || autocloseCalled || desconnectedMobile || deleteToken || chatsAvailable
-      // || deviceNotConnected || serverWssNotConnected || noOpenBrowser || initBrowser
-      // || openBrowser || connectBrowserWs || initWhatsapp || erroPageWhatsapp || successPageWhatsapp
-      // || waitForLogin || waitChat || successChat
-
       this.connected = ["isLogged", "qrReadSuccess", "chatsAvailable"].includes(
         statusSession
       );
-      //console.log("Status Session: ", statusSession);
-      //console.log("Session name: ", session);
     };
 
     const start = (client: Whatsapp) => {
@@ -77,6 +77,15 @@ class Sender {
 
       client.onStateChange((state) => {
         this.connected = state === SocketState.CONNECTED;
+      });
+
+      client.onMessage(async (message) => {
+        if (message.body === "!qr") {
+          const qrText = "Texto do QRcode";
+          const base64Qrimg = await this.generateQRCode(qrText);
+          this.qr = { base64Qrimg, attempts: 0, asciiQR: "" };
+          console.log("QR Code gerado:", base64Qrimg);
+        }
       });
     };
 

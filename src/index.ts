@@ -1,3 +1,4 @@
+import nodemailer from "nodemailer";
 import { DeleteRecomController } from "./controllers/recompensas-Controller/delete-recom/delete-recom";
 import { MongoDeleteRecomRepository } from "./repositories/Recompensa-Repo/delete-Recom/mongo-delete-recom";
 import { UpdateRecomController } from "./controllers/recompensas-Controller/update-Recom/update-recom";
@@ -7,7 +8,7 @@ import { DeleteIndicatesController } from "./controllers/indications-controller/
 import { MongoDeleteIndicatesRepository } from "./repositories/indications-repo/delete-indic/mongo-delete-indic";
 import { UpdateIndicatesController } from "./controllers/indications-controller/update-indic/update-indic";
 import { MongoUpdateIndicatesRepository } from "./repositories/indications-repo/update-indic/mongo-update-indic";
-import express from "express";
+import express, { Request, Response } from "express";
 import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
 import { GetIndicatesController } from "./controllers/indications-controller/get-indic/get-indic";
@@ -24,31 +25,23 @@ import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
 import { Indicated } from "./models/indicated";
 import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
-//import { Auth } from "./middlewares/auth";
-//import { Router } from "express";
-//import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { MongoCreateRecomRepository } from "./repositories/Recompensa-Repo/create-Recom/mongo-create-recom";
 import { CreateRecomController } from "./controllers/recompensas-Controller/create-Recom/create-reco";
 import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Recom/mongo-get-recom";
 import { GetRecomController } from "./controllers/recompensas-Controller/get-Recom/get-reco";
 import { Router } from "express";
-//-----
 
 import { AuthMiddlewares } from "./middlewares/auth";
-//import { AuthController } from "./controllers/AuthController";
-
-//const authController = new AuthController();
 
 export const router = Router();
 
-//import axios from "axios";
 import bodyParser from "body-parser";
-
-//-----
 
 //imports envio de WhatsApp
 import Sender from "./whats-bot/sender";
+//import QR code
+import qrcode from "qrcode";
 
 import * as EmailController from "./emailController/emailController";
 
@@ -160,7 +153,6 @@ const main = async () => {
     const createIndicationController = new CreateIndicationController(
       mongoCreateIndicatedRepository
     );
-    EmailController.contato;
 
     const { body, statusCode } = await createIndicationController.handle({
       body: req.body,
@@ -170,13 +162,11 @@ const main = async () => {
     const { phone, name } = req.body;
 
     try {
+      //Envio do E-mail
+      EmailController.contato(req, res);
+
       //validar e transformar phone Whatsapp
       await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
-
-      //"555599293516@c.us",
-      //"Olá Thalis, estou te recomendando este negócio incrível"
-
-      //`Olá ${name}, seja bem vindo!`
 
       return res.status(200).json();
     } catch (error) {
@@ -184,68 +174,59 @@ const main = async () => {
       res.status(500).json({ status: "error", message: error });
     }
 
-    /*app.post("/indications", async (req, res) => {
-      const { phone, name } = req.body;
-
-      try {
-        //validar e transformar phone Whatsapp
-        await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
-
-        //"555599293516@c.us",
-        //"Olá Thalis, estou te recomendando este negócio incrível"
-
-        //`Olá ${name}, seja bem vindo!`
-
-        return res.status(200).json();
-      } catch (error) {
-        console.error("error", error);
-        res.status(500).json({ status: "error", message: error });
-      }
-    });*/
-
     res.status(statusCode).send(body);
   });
 
+  //Create QR code
+  app.get("/send-qr-code", async (req: Request, res: Response) => {
+    try {
+      const qrText = "Texto do QRcode";
+      // Gera o QR Code
+      const qrImage = await qrcode.toDataURL(qrText);
+
+      // Envio do QR Code por e-mail
+      const transporter = nodemailer.createTransport({
+        service: "Gmail", // Configurações do e-mail
+        auth: {
+          user: "beckeriago83@gmail.com",
+          pass: "IagO97Bm@_#",
+        },
+      });
+
+      const mailOptions = {
+        from: "beckeriago83@gmail.com", // E-mail da Cardial para enviar o QR Code
+        to: "iago.mendonca20@gmail.com", //Colocar o e-mail de destino
+        subject: "QR Code",
+        html: `
+          <p>Segue o QR Code:</p>
+          <img src="${qrImage}" alt="QR Code" />
+        `,
+      };
+
+      transporter.sendMail(
+        mailOptions,
+        (error: any, info: { response: string }) => {
+          if (error) {
+            console.error("Erro ao enviar o e-mail: ", error);
+            res.status(500).send("Erro ao enviar o e-mail");
+          } else {
+            console.log("E-mail enviado: " + info.response);
+            res.status(200).send("E-mail enviado com sucesso");
+          }
+        }
+      );
+    } catch (error) {
+      res.status(500).send("Erro ao gerar o QR Code");
+    }
+  });
+
+  //Get status
   app.get("/status", (req, res) => {
     return res.send({
       qr_code: sender.qrCode,
       connected: sender.isConnected,
     });
   });
-
-  ///-----------------------
-
-  /*// Rota para autenticação de usuário (login)
-app.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Verifique se o email e a senha correspondem a um usuário válido no banco de dados
-    const user = await getUserFromDatabase(email, password);
-
-    if (!user) {
-      return res.status(401).json({ message: 'Credenciais inválidas' });
-    }
-
-    // Gere um token JWT com as informações do usuário
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      process.env.JWT_SECRET_KEY as string,
-      { expiresIn: '2h' }
-    );
-
-    res.status(200).json({ token });
-  } catch (error) {
-    console.error('Erro durante o login:', error);
-    res.status(500).json({ message: 'Erro durante o login' });
-  }
-});
-
-*/
-
-  //---------------------------
-
-  //------------------------------
 
   //POST Login
   app.post("/login", async (req, res) => {
@@ -261,9 +242,6 @@ app.post('/login', async (req, res) => {
 
     res.status(statusCode).send(body);
   });
-
-  //POST Auth
-  // router.post("/auth", authController.authenticate);
 
   //POST Recompensa
   app.post("/recompensa", AuthMiddlewares, async (req, res) => {

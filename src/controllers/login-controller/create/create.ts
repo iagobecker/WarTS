@@ -1,3 +1,4 @@
+//import { compare } from "bcrypt";
 import { MongoClient } from "./../../../database/mongo";
 import { badRequest, created, serverError } from "./../../helpers";
 import { HttpRequest, HttpResponse, IController } from "./../../protocols";
@@ -5,8 +6,6 @@ import { Logi } from "./../../../models/login";
 import { CreateLogiParams, ICreateLogiRepository } from "./protocols";
 import dotenv from "dotenv";
 import { sign } from "jsonwebtoken";
-//import { compare } from "bcrypt";
-//import validator from "validator";
 
 dotenv.config();
 
@@ -35,15 +34,15 @@ export class CreateLogiController implements IController {
         return badRequest("Usuário não encontrado");
       }
 
-      //ERROOOOOO Verificar se a senha fornecida na solicitação corresponde à senha no banco de dados
-      /* const isPasswordCorrect = await compare(
-        httpRequest.body!.password,
-        userExists.password
-      );
+      // Verificar se a senha fornecida é válida
+      const isPasswordValid = await MongoClient.db
+        .collection("users")
+        .findOne({ password: httpRequest.body!.password });
+      userExists.password;
 
-      if (!isPasswordCorrect) {
-        return badRequest("Senha incorreta");
-      }*/
+      if (!isPasswordValid) {
+        return badRequest("Senha inválida");
+      }
 
       // Se tudo estiver correto, crie um token JWT
       const token = sign(
