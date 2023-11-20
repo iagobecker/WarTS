@@ -1,6 +1,7 @@
 import parsePhoneNumber, { isValidPhoneNumber } from "libphonenumber-js";
 import { create, Whatsapp, SocketState } from "venom-bot";
 import qrcode from "qrcode";
+import fs from "fs";
 
 export type QRCode = {
   base64Qrimg: string;
@@ -53,6 +54,7 @@ class Sender {
   }
 
   //Cria o VenomBot e associa a propriedade Sender client
+  // Método para gerar o QRCode e atualizar os dados na classe Sender
   private async generateQRCode(text: string): Promise<string> {
     try {
       return await qrcode.toDataURL(text);
@@ -60,6 +62,23 @@ class Sender {
       throw new Error("Erro ao gerar QR Code: " + error);
     }
   }
+
+  // Exporta o QR Code como uma imagem
+  /* async exportQRCode(qrText: string, filename: string): Promise<void> {
+    const base64Qrimg = await this.generateQRCode(qrText);
+    const matches = base64Qrimg.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+    const response: any = {};
+
+    if (!matches || matches.length !== 3) {
+      throw new Error("String de entrada inválida");
+    }
+
+    response.type = matches[1];
+    response.data = Buffer.from(matches[2], "base64");
+
+    fs.writeFileSync("../QRimages/out.png", response.data, "binary");
+    console.log(`QR Code exportado como QRimages/out.png`);
+  }*/
 
   private initialize() {
     const qr = (base64Qrimg: string, attempts: number, asciiQR: string) => {
@@ -82,16 +101,22 @@ class Sender {
       client.onMessage(async (message) => {
         if (message.body === "!qr") {
           const qrText = "Texto do QRcode";
-          const base64Qrimg = await this.generateQRCode(qrText);
-          this.qr = { base64Qrimg, attempts: 0, asciiQR: "" };
-          console.log("QR Code gerado:", base64Qrimg);
+          //await this.exportQRCode(qrText, "out.png");
         }
       });
     };
 
-    create({ session: "whats-indicate" })
+    create({ session: "whats-indicate", logQR: false })
       .then((client) => start(client))
       .catch((error) => console.log(error));
+  }
+
+  // Método para gerar o QRCode e atualizar os dados na classe Sender
+  async sendQRCode() {
+    const qrText = "Texto do QRcode";
+    const base64Qrimg = await this.generateQRCode(qrText);
+    this.qr = { base64Qrimg, attempts: 0, asciiQR: "" };
+    console.log("QR Code gerado:", base64Qrimg);
   }
 }
 

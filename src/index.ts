@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import { DeleteRecomController } from "./controllers/recompensas-Controller/delete-recom/delete-recom";
 import { MongoDeleteRecomRepository } from "./repositories/Recompensa-Repo/delete-Recom/mongo-delete-recom";
 import { UpdateRecomController } from "./controllers/recompensas-Controller/update-Recom/update-recom";
@@ -8,7 +7,7 @@ import { DeleteIndicatesController } from "./controllers/indications-controller/
 import { MongoDeleteIndicatesRepository } from "./repositories/indications-repo/delete-indic/mongo-delete-indic";
 import { UpdateIndicatesController } from "./controllers/indications-controller/update-indic/update-indic";
 import { MongoUpdateIndicatesRepository } from "./repositories/indications-repo/update-indic/mongo-update-indic";
-import express, { Request, Response } from "express";
+import express from "express";
 import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
 import { GetIndicatesController } from "./controllers/indications-controller/get-indic/get-indic";
@@ -34,6 +33,10 @@ import { Router } from "express";
 
 import { AuthMiddlewares } from "./middlewares/auth";
 
+//=================================
+import fs from "fs";
+//=================================
+
 export const router = Router();
 
 import bodyParser from "body-parser";
@@ -41,7 +44,9 @@ import bodyParser from "body-parser";
 //imports envio de WhatsApp
 import Sender from "./whats-bot/sender";
 //import QR code
-import qrcode from "qrcode";
+import generateQRCode from "./whats-bot/QrExport";
+
+//Envio QRCode E-mail
 
 import * as EmailController from "./emailController/emailController";
 
@@ -53,6 +58,8 @@ const main = async () => {
   const app = express();
   //----------------
   const sender = new Sender();
+  //Qr Code
+
   app.use(express.urlencoded({ extended: false }));
 
   app.use(bodyParser.json());
@@ -153,73 +160,128 @@ const main = async () => {
     const createIndicationController = new CreateIndicationController(
       mongoCreateIndicatedRepository
     );
-
-    const { body, statusCode } = await createIndicationController.handle({
-      body: req.body,
-    });
-
-    ///MANDANDO ZAP ZAP
-    const { phone, name } = req.body;
-
     try {
+      const { body, statusCode } = await createIndicationController.handle({
+        body: req.body,
+      });
+
+      const { phone, name } = req.body; //Mando o zap zap
+
       //Envio do E-mail
-      EmailController.contato(req, res);
+      await EmailController.contato(req, res);
 
       //validar e transformar phone Whatsapp
       await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
-
-      return res.status(200).json();
     } catch (error) {
       console.error("error", error);
       res.status(500).json({ status: "error", message: error });
     }
-
-    res.status(statusCode).send(body);
   });
 
-  //Create QR code
-  app.get("/send-qr-code", async (req: Request, res: Response) => {
+  /*app.get("/send-qr-code", async (req, res) => {
     try {
-      const qrText = "Texto do QRcode";
+      // Aciona o método que gera o QRCode na classe Sender
+      await sender.sendQRCode();
+
+      // Espera um curto período para garantir que o QR Code seja gerado
+      setTimeout(() => {
+        const qrCodeData = sender.qrCode;
+
+        if (!qrCodeData) {
+          return res.status(500).send("QRCode não foi gerado.");
+        }
+
+        res.send(`<img src="${qrCodeData.base64Qrimg}" alt="QR Code" />`);
+      }, 1000); // Tempo de espera para garantir que o QR Code seja gerado
+    } catch (error) {
+      res.status(500).send("Erro ao gerar o QRCode.");
+    }
+  });*/
+
+  //================================================================================================
+
+  app.get("/generate-qrcode", async (req, res) => {
+    try {
+      const base64Qr = await generateQRCode();
+      const qrImage = Buffer.from(
+        base64Qr.split(";base64,").pop() || "",
+        "base64"
+      );
+
+      fs.writeFileSync("out.png", qrImage, "binary");
+      res.sendFile("out.png", { root: __dirname }); // Sends the generated QR image to the client
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Error generating QR code");
+    }
+  });
+
+  //================================================================================================
+
+  //Create QR code
+  /*const sendQRCodeByEmail = async (req: Request, res: Response) => {
+    try {
+      const qrText = 'Texto do QRcode';
       // Gera o QR Code
       const qrImage = await qrcode.toDataURL(qrText);
-
-      // Envio do QR Code por e-mail
+      const { email } = req.body;
+  
+      // Configurações para a autenticação
+      const CLIENT_ID = process.env.CLIENT_ID;
+      const CLIENT_SECRET = process.env.CLIENT_SECRET;
+      const REDIRECT_URI = 'https://developers.google.com/oauthplayground';
+      const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+  
+      const oAuth2Client = new google.auth.OAuth2(
+        CLIENT_ID,
+        CLIENT_SECRET,
+        REDIRECT_URI
+      );
+  
+      oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN });
+  
+      // Cria um transporte para enviar e-mails
       const transporter = nodemailer.createTransport({
-        service: "Gmail", // Configurações do e-mail
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
         auth: {
-          user: "beckeriago83@gmail.com",
-          pass: "IagO97Bm@_#",
+          type: 'OAuth2',
+          user: 'beckeriago83@gmail.com',
+          clientId: CLIENT_ID,
+          clientSecret: CLIENT_SECRET,
+          refreshToken: REFRESH_TOKEN,
+          accessToken: oAuth2Client.getAccessToken(),
         },
       });
-
+  
       const mailOptions = {
-        from: "beckeriago83@gmail.com", // E-mail da Cardial para enviar o QR Code
-        to: "iago.mendonca20@gmail.com", //Colocar o e-mail de destino
-        subject: "QR Code",
+        from: 'beckeriago83@gmail.com',
+        to: `${email}`,
+        subject: 'QR Code',
         html: `
           <p>Segue o QR Code:</p>
           <img src="${qrImage}" alt="QR Code" />
         `,
       };
-
-      transporter.sendMail(
-        mailOptions,
-        (error: any, info: { response: string }) => {
-          if (error) {
-            console.error("Erro ao enviar o e-mail: ", error);
-            res.status(500).send("Erro ao enviar o e-mail");
-          } else {
-            console.log("E-mail enviado: " + info.response);
-            res.status(200).send("E-mail enviado com sucesso");
-          }
+  
+      transporter.sendMail(mailOptions, (error: any, info: { response: string }) => {
+        if (error) {
+          console.error('Erro ao enviar o e-mail:', error);
+          res.status(500).send('Erro ao enviar o e-mail');
+        } else {
+          console.log('E-mail enviado:', info.response);
+          res.status(200).send('E-mail enviado com sucesso');
         }
-      );
+      });
     } catch (error) {
-      res.status(500).send("Erro ao gerar o QR Code");
+      res.status(500).send('Erro ao gerar o QR Code');
     }
-  });
-
+  };
+  
+  // Rota para enviar o QR Code por e-mail
+  app.post('/send-qr-code', sendQRCodeByEmail);
+*/
   //Get status
   app.get("/status", (req, res) => {
     return res.send({

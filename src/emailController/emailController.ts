@@ -11,7 +11,7 @@ export const contato = async (req: Request, res: Response) => {
       user: "553be306ef80a2",
       pass: "9ef5afa11f8cf2",
   */
-  const transporter = nodemailer.createTransport({
+  /* const transporter = nodemailer.createTransport({
     host: "sandbox.smtp.mailtrap.io",
     port: 2525,
     auth: {
@@ -19,23 +19,23 @@ export const contato = async (req: Request, res: Response) => {
       pass: "9ef5afa11f8cf2",
     },
   });
-
-  /* const transporter = nodemailer.createTransport({
+*/
+  const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
-    port: 587,
-    //secure: true,
+    port: 465,
+    secure: true,
     auth: {
-      user: "beckeriago83@gmail.com",
-      pass: "IagO97Bm@_#",
+      user: "iagosbm97@gmail.com",
+      pass: "rqkshgzaqvnxigrx",
     },
-  });*/
+  });
 
   //Configurando a Mensagem
   const message = {
     // Quem está enviando o E-mail (usando o nome da pessoa que fez a requisição)
-    from: "beckeriago83@gmail.com" /*`"${req.body.name}" <${req.body.from}>`,*/,
+    from: "iagosbm97@gmail.com" /* `"${req.body.name}" <${req.body.email}>`,*/,
     // Para quem vai ser enviado (o e-mail especificado no campo "email")
-    to: req.body.email,
+    to: "beckeriago83@gmail.com",
     // Assunto do E-mail
     subject: "Parabéns, você foi indicado!" /*req.body.subject,*/,
     // Corpo do E-mail (conteúdo do E-mail)
