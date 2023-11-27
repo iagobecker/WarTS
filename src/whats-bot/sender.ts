@@ -106,7 +106,7 @@ class Sender {
       });
     };
 
-    create({ session: "whats-indicate", logQR: false })
+    create({ session: "whats-indicate" })
       .then((client) => start(client))
       .catch((error) => console.log(error));
   }
