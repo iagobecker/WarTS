@@ -2,9 +2,9 @@
 
 # Pré-requisitos
 
-É necessário instalar uma série de ferramentas antes de atuarmos em nossa API. Não é 100% certo mas para evitar problema, instale as ferramentas de forma sequencialmente a esse tutorial, segue:
+É necessário instalar uma série de ferramentas antes de atuarmos em nossa API. Para evitar problemas, instale as ferramentas de forma sequencialmente a esse tutorial, segue:
 
-1. Bom, provavelmente você deve está usando Windows, por isso é necessário baixar o wsl, que é um subsistema linux dentro do windows, o mesmo é necessário para você usar o docker que vem a seguir. Para instalar o wsl é muito fácil, abra o powershell como ******************adminstrador****************** e digite o seguinte comando:
+1. Bom, provavelmente você deve está usando Windows, por isso é necessário baixar o wsl, que é um subsistema linux dentro do windows, o mesmo é necessário para você usar o docker que vem a seguir. Para instalar o wsl é muito fácil, abra o powershell como **adminstrador** e digite o seguinte comando:
 
 ```jsx
 wsl --install
@@ -14,7 +14,7 @@ wsl --install
 
 https://docs.docker.com/desktop/install/windows-install/
 
-1. Caso não tenha, instale nodejs 
+1. Caso não tenha, instale nodejs
 
 https://nodejs.org/en
 
@@ -26,7 +26,7 @@ Nem precisa dizer mas… clone o projeto, entre na raiz do projeto clonado e exe
 npm install
 ```
 
-Após isso suba a maquina virtual do docker usando
+Após isso suba a maquina virtual do docker usando para isso você deve acessar o powershell como **administrador**
 
 ```jsx
 docker-compose up
@@ -45,7 +45,7 @@ MONGODB_USERNAME=root
 
 MONGODB_PASSWORD=1a2b3c
 
-MONGODB_URL=mongodb+srv://cluster0.julpcqs.mongodb.net     
+MONGODB_URL=mongodb+srv://cluster0.julpcqs.mongodb.net
 
 JWT_SECRET_KEY=123
 ```

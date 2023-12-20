@@ -2,66 +2,50 @@ import { DeleteRecomController } from "./controllers/recompensas-Controller/dele
 import { MongoDeleteRecomRepository } from "./repositories/Recompensa-Repo/delete-Recom/mongo-delete-recom";
 import { UpdateRecomController } from "./controllers/recompensas-Controller/update-Recom/update-recom";
 import { MongoUpdateRecomRepository } from "./repositories/Recompensa-Repo/update-Recom/mongo-update-recom";
-import { CreateLogiController } from "./controllers/login-controller/create/create";
 import { DeleteIndicatesController } from "./controllers/indications-controller/delete-indic/delete-indic";
 import { MongoDeleteIndicatesRepository } from "./repositories/indications-repo/delete-indic/mongo-delete-indic";
 import { UpdateIndicatesController } from "./controllers/indications-controller/update-indic/update-indic";
 import { MongoUpdateIndicatesRepository } from "./repositories/indications-repo/update-indic/mongo-update-indic";
-import express from "express";
-import { config } from "dotenv";
 import { GetUsersController } from "./controllers/get-users/get-users";
+import { MongoGetUsersRepository } from "./repositories/get_users/mongo-get-users";
 import { GetIndicatesController } from "./controllers/indications-controller/get-indic/get-indic";
 import { MongoGetIndicatesRepository } from "./repositories/indications-repo/get-indic/mongo-get-indicates";
-import { MongoGetUsersRepository } from "./repositories/get_users/mongo-get-users";
-import { MongoClient } from "./database/mongo";
-import { MongoCreateUserRepository } from "./repositories/create-user/mongo-create-user";
 import { CreateUserController } from "./controllers/create-user/create-user";
-import { MongoUpdateUserRepository } from "./repositories/update-user/mongo-update-user";
+import { MongoCreateUserRepository } from "./repositories/create-user/mongo-create-user";
 import { UpdateUserController } from "./controllers/update-user/update-user";
-import { MongoDeleteUserRepository } from "./repositories/delete-user/mongo-delete-user";
+import { MongoUpdateUserRepository } from "./repositories/update-user/mongo-update-user";
 import { DeleteUserController } from "./controllers/delete-user/delete-user";
-import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
+import { MongoDeleteUserRepository } from "./repositories/delete-user/mongo-delete-user";
 import { CreateIndicationController } from "./controllers/indications-controller/create-indic/create-indic";
-import { Indicated } from "./models/indicated";
-import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
-import dotenv from "dotenv";
-import { MongoCreateRecomRepository } from "./repositories/Recompensa-Repo/create-Recom/mongo-create-recom";
+import { MongoCreateIndicatedRepository } from "./repositories/indications-repo/create-indic/mongo-create-indic";
 import { CreateRecomController } from "./controllers/recompensas-Controller/create-Recom/create-reco";
-import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Recom/mongo-get-recom";
+import { MongoCreateRecomRepository } from "./repositories/Recompensa-Repo/create-Recom/mongo-create-recom";
 import { GetRecomController } from "./controllers/recompensas-Controller/get-Recom/get-reco";
-import { Router } from "express";
-
-import { AuthMiddlewares } from "./middlewares/auth";
-
-//=================================
-import fs from "fs";
-//=================================
-
-export const router = Router();
-
-import bodyParser from "body-parser";
-
-//imports envio de WhatsApp
-import Sender from "./whats-bot/sender";
-//import QR code
-import generateQRCode from "./whats-bot/QrExport";
-
-//Envio QRCode E-mail
-
+import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Recom/mongo-get-recom";
+import { CreateLogiController } from "./controllers/login-controller/create/create";
+import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
 import * as EmailController from "./emailController/emailController";
+import { AuthMiddlewares } from "./middlewares/auth";
+import { Indicated } from "./models/indicated";
+import { Router } from "express";
+import { MongoClient } from "./database/mongo";
+import dotenv from "dotenv";
+import express from "express";
+import { config } from "dotenv";
+import fs from "fs";
+import bodyParser from "body-parser";
+import Sender from "./whats-bot/sender";
+import generateQRCode from "./whats-bot/QrExport";
+export const router = Router();
 
 dotenv.config();
 
 const main = async () => {
   config();
-
   const app = express();
-  //----------------
   const sender = new Sender();
-  //Qr Code
 
   app.use(express.urlencoded({ extended: false }));
-
   app.use(bodyParser.json());
   app.use(express.json());
 
@@ -141,11 +125,9 @@ const main = async () => {
   //POST /users
   app.post("/users", async (req, res) => {
     const mongoCreateUserRepository = new MongoCreateUserRepository();
-
     const createUserController = new CreateUserController(
       mongoCreateUserRepository
     );
-
     const { body, statusCode } = await createUserController.handle({
       body: req.body,
     });
@@ -156,7 +138,6 @@ const main = async () => {
   //POST /indications
   app.post("/indications", async (req, res) => {
     const mongoCreateIndicatedRepository = new MongoCreateIndicatedRepository();
-
     const createIndicationController = new CreateIndicationController(
       mongoCreateIndicatedRepository
     );
@@ -164,12 +145,8 @@ const main = async () => {
       const { body, statusCode } = await createIndicationController.handle({
         body: req.body,
       });
-
       const { phone, name } = req.body; //Mando o zap zap
-
-      //Envio do E-mail
-      await EmailController.contato(req, res);
-
+      await EmailController.contato(req, res); //Envio do E-mail
       //validar e transformar phone Whatsapp
       await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
     } catch (error) {
@@ -197,8 +174,6 @@ const main = async () => {
       res.status(500).send("Erro ao gerar o QRCode.");
     }
   });*/
-
-  //================================================================================================
 
   app.get("/generate-qrcode", async (req, res) => {
     try {
@@ -293,11 +268,9 @@ const main = async () => {
   //POST Login
   app.post("/login", async (req, res) => {
     const mongoCreateLogiRepository = new MongoCreateLogiRepository();
-
     const createLogiController = new CreateLogiController(
       mongoCreateLogiRepository
     );
-
     const { body, statusCode } = await createLogiController.handle({
       body: req.body,
     });
