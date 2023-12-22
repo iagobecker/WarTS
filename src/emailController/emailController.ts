@@ -1,25 +1,8 @@
 import { Request, Response } from "express";
 import nodemailer from "nodemailer";
 
-export const contato = async (req: Request, res: Response) => {
-  //configurando o Transporter
-  //para fazer um envio REAL tem que trocar o transport
-  /*
-  host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-      user: "553be306ef80a2",
-      pass: "9ef5afa11f8cf2",
-  */
-  /* const transporter = nodemailer.createTransport({
-    host: "sandbox.smtp.mailtrap.io",
-    port: 2525,
-    auth: {
-      user: "553be306ef80a2",
-      pass: "9ef5afa11f8cf2",
-    },
-  });
-*/
+export const contato = async (req: Request, res: Response, recipientEmail: string) => {
+
   const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
@@ -30,21 +13,19 @@ export const contato = async (req: Request, res: Response) => {
     },
   });
 
-  //Configurando a Mensagem
   const message = {
-    // Quem está enviando o E-mail (usando o nome da pessoa que fez a requisição)
-    from: "iagosbm97@gmail.com" /* `"${req.body.name}" <${req.body.email}>`,*/,
-    // Para quem vai ser enviado (o e-mail especificado no campo "email")
-    to: "beckeriago83@gmail.com",
-    // Assunto do E-mail
-    subject: "Parabéns, você foi indicado!" /*req.body.subject,*/,
-    // Corpo do E-mail (conteúdo do E-mail)
-    //text: "Olá mister, estou te recomendando este negócio incrível",
+   
+    from: "Thalis Antunes <thalisantunes@hotmail.com>" ,
+  
+    to: recipientEmail,
+   
+    subject: "Parabéns, você foi indicado!" ,
+   
     html: "<p>Olá mister, estou te recomendando este negócio incrível</p>",
   };
 
   try {
-    //Enviando a Mensagem
+   
     transporter.sendMail(message, (error, info) => {
       if (error) {
         console.error("Erro ao enviar o e-mail:", error);
@@ -57,11 +38,6 @@ export const contato = async (req: Request, res: Response) => {
       }
     });
 
-    //const info = await transport.sendMail(message);
-
-    //console.log("INFO", info);
-
-    //res.json({ success: true });
   } catch (error) {
     console.error("Erro ao enviar o e-mail:", error);
     res.status(500).json({ success: false, error: "Erro ao enviar o e-mail" });

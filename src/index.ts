@@ -145,8 +145,8 @@ const main = async () => {
       const { body, statusCode } = await createIndicationController.handle({
         body: req.body,
       });
-      const { phone, name } = req.body; //Mando o zap zap
-      await EmailController.contato(req, res); //Envio do E-mail
+      const { phone, name, email } = req.body; //Mando o zap zap
+      await EmailController.contato(req, res, email); //Envio do E-mail
       //validar e transformar phone Whatsapp
       await sender.sendText(phone, `Olá ${name}, seja bem vindo!`);
     } catch (error) {
