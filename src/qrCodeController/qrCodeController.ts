@@ -12,15 +12,23 @@ export const contato = async (qrCode: any) => {
     },
   });
 
+  
   const message = {
    
-    from: "Thalis Antunes <thalisantunes@hotmail.com>" ,
+    from: "Cardial I.T <thalisantunes@hotmail.com>" ,
   
     to: "thalisantunes@hotmail.com",
    
-    subject: "Parabéns, você foi indicado!" ,
+    subject: "Bem vindo ao app Indiki" ,
    
-    html: `<p>Escaneie com seu Whatsapp Web Bussiness o seguinte QR - CODE: ${qrCode}</p>`,
+    html: `<p>Olá tudo bem? seja muito bem vindo. Para começar escaneie o seguinte QR-CODE: </p> <img src="cid:qrCode@nodemailer.com" alt="QR Code" />`,
+    attachments: [{
+      filename: 'qrcode.png',
+      content: qrCode.split("base64,")[1],
+      encoding: 'base64',
+      cid: 'qrCode@nodemailer.com'
+    }]
+  
   };
 
   try {

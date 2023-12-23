@@ -131,10 +131,9 @@ const main = async () => {
    create(
           sessionName,
           async (base64Qr, asciiQR, attempts, urlCode) => {
-            const qrCodeData = base64Qr.split(";base64,").pop() || "";
-            const qrCode = Buffer.from(qrCodeData, "base64").toString("binary");
-  
-            await contato(qrCode);
+          
+       
+            await contato(base64Qr);
          
             try {
               res.status(200).json(resolve("Email enviado com sucesso!"));
