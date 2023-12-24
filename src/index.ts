@@ -34,11 +34,9 @@ import dotenv from "dotenv";
 import express, { Request, Response }  from "express";
 import { config } from "dotenv";
 import { create, Whatsapp, SocketState } from "venom-bot";
-import fs from "fs";
 import bodyParser from "body-parser";
-import Sender from "./whats-bot/sender";
-import generateQRCode from "./whats-bot/QrExport";
 export const router = Router();
+import parsePhoneNumber, { isValidPhoneNumber } from "libphonenumber-js";
 
 dotenv.config();
 
@@ -116,8 +114,6 @@ const main = async () => {
     try {
       const sessionName = `admin_${Date.now()}`;
       const qrCode = await createVenomInstance(req, res, sessionName);
-  
-      // Envie o QR Code como resposta
       res.status(200).json({ sessionName, qrCode });
     } catch (error) {
       console.error("Erro ao registrar o administrador:", error);
@@ -125,32 +121,33 @@ const main = async () => {
     }
   });
 
+  let globalClientInstance: any;  
 
   async function createVenomInstance(req: Request, res: Response, sessionName: any) {
     return new Promise((resolve, reject) => {
-   create(
-          sessionName,
-          async (base64Qr, asciiQR, attempts, urlCode) => {
-          
-       
-            await contato(base64Qr);
-         
-            try {
-              res.status(200).json(resolve("Email enviado com sucesso!"));
-             
-            } catch (error) {
-              reject(error);
-            }
-          },
-          undefined,
-          { logQR: false }
-        )
-        .catch((error) => {
-          reject(error);
-        });
+      create(
+        sessionName,
+        async (base64Qr, asciiQR, attempts, urlCode) => {
+          await contato(base64Qr);
+  
+          try {
+            res.status(200).json(resolve("Email enviado com sucesso!"));
+          } catch (error) {
+            reject(error);
+          }
+        },
+        undefined,
+        { logQR: false }
+      ).then((client) => {
+        console.log("AQUII " + JSON.stringify(client));
+        globalClientInstance = client;
+        resolve(client);  
+      }).catch((error) => {
+        reject(error);
+      });
     });
   }
-
+  
 
 
   //GET Recompensas
@@ -187,14 +184,30 @@ const main = async () => {
       const { body, statusCode } = await createIndicationController.handle({
         body: req.body,
       });
-      const { phone, name, email } = req.body; //Mando o zap zap
-      await EmailController.contato(req, res, email); //Envio do E-mail
-   
+      const { phone, name, email } = req.body; 
+      // await EmailController.contato(req, res, email); //Envio do E-mail
+      console.log(globalClientInstance)
+      console.log(phone)
+      await sendMessage(globalClientInstance, phone, "Teste");
     } catch (error) {
       console.error("error", error);
       res.status(500).json({ status: "error", message: error });
     }
   });
+
+
+  async function sendMessage(client: any, phoneNumber: any, message: any) {
+
+    const telefoneTratado = phoneNumber +'@c.us';
+
+
+
+    if (globalClientInstance) {
+      await globalClientInstance.sendText(telefoneTratado, message);
+    } else {
+      console.error("Cliente não está definido");
+    }
+  }
 
   //POST Login
   app.post("/login", async (req, res) => {
