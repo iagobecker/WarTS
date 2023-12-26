@@ -185,10 +185,8 @@ const main = async () => {
         body: req.body,
       });
       const { phone, name, email } = req.body; 
-      // await EmailController.contato(req, res, email); //Envio do E-mail
-      console.log(globalClientInstance)
-      console.log(phone)
-      await sendMessage(globalClientInstance, phone, "Teste");
+       await EmailController.contato(req, res, email); 
+      await sendMessage(globalClientInstance, phone, "Olá tudo bem? Você foi indicado a experimentar o nosso aplicativo, participe, indique amigos e ganhe recompensas.");
     } catch (error) {
       console.error("error", error);
       res.status(500).json({ status: "error", message: error });
