@@ -25,17 +25,17 @@ import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Reco
 import { CreateLogiController } from "./controllers/login-controller/create/create";
 import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
 import * as EmailController from "./emailController/emailController";
-import { contato } from '../src/qrCodeController/qrCodeController';
+import { contato } from "../src/qrCodeController/qrCodeController";
 import { AuthMiddlewares } from "./middlewares/auth";
 import { Indicated } from "./models/indicated";
-import { Router } from "express";
+//import { Router } from "express";
 import { MongoClient } from "./database/mongo";
 import dotenv from "dotenv";
-import express, { Request, Response }  from "express";
+import express, { Request, Response } from "express";
 import { config } from "dotenv";
 import { create, Whatsapp, SocketState } from "venom-bot";
 import bodyParser from "body-parser";
-export const router = Router();
+//export const router = Router();
 import parsePhoneNumber, { isValidPhoneNumber } from "libphonenumber-js";
 
 dotenv.config();
@@ -117,38 +117,43 @@ const main = async () => {
       res.status(200).json({ sessionName, qrCode });
     } catch (error) {
       console.error("Erro ao registrar o administrador:", error);
-      res.status(500).json({ success: false, error: "Erro ao registrar o administrador" });
+      res
+        .status(500)
+        .json({ success: false, error: "Erro ao registrar o administrador" });
     }
   });
 
-  let globalClientInstance: any;  
+  let globalClientInstance: any;
 
-  async function createVenomInstance(req: Request, res: Response, sessionName: any) {
-    return new Promise((resolve, reject) => {
-      create(
+  //Objeto para armazenar diferentes instâncias
+  const sessions: Record<string, Whatsapp> = {};
+
+  async function createVenomInstance(
+    req: Request,
+    res: Response,
+    sessionName: string
+  ) {
+    try {
+      const client = await create(
         sessionName,
         async (base64Qr, asciiQR, attempts, urlCode) => {
           await contato(base64Qr);
-  
-          try {
-            res.status(200).json(resolve("Email enviado com sucesso!"));
-          } catch (error) {
-            reject(error);
-          }
+
+          res.status(200).json({ message: "Email enviado com sucesso!" });
         },
         undefined,
         { logQR: false }
-      ).then((client) => {
-        console.log("AQUII " + JSON.stringify(client));
-        globalClientInstance = client;
-        resolve(client);  
-      }).catch((error) => {
-        reject(error);
-      });
-    });
-  }
-  
+      );
 
+      sessions[sessionName] = client;
+
+      console.log(`Instância ${sessionName} criada com sucesso.`);
+      return client;
+    } catch (error) {
+      console.error(`Erro ao criar a instância ${sessionName}:`, error);
+      throw error;
+    }
+  }
 
   //GET Recompensas
   app.get("/recompensas", AuthMiddlewares, async (req, res) => {
@@ -184,24 +189,39 @@ const main = async () => {
       const { body, statusCode } = await createIndicationController.handle({
         body: req.body,
       });
-      const { phone, name, email } = req.body; 
-       await EmailController.contato(req, res, email); 
-      await sendMessage(globalClientInstance, phone, "Olá tudo bem? Você foi indicado a experimentar o nosso aplicativo, participe, indique amigos e ganhe recompensas.");
+      const { phone, name, email } = req.body;
+      await EmailController.contato(req, res, email);
+      await sendMessage(
+        globalClientInstance,
+        phone,
+        "Olá, tudo bem? Você foi indicado a experimentar o nosso aplicativo. Participe, indique amigos e ganhe recompensas."
+      );
     } catch (error) {
       console.error("error", error);
       res.status(500).json({ status: "error", message: error });
     }
   });
 
+  async function sendMessage(
+    client: any,
+    phoneNumber: string,
+    message: string
+  ) {
+    if (!isValidPhoneNumber(phoneNumber, "BR")) {
+      throw new Error("Número de telefone inválido");
+    }
 
-  async function sendMessage(client: any, phoneNumber: any, message: any) {
+    let formattedPhoneNumber = parsePhoneNumber(phoneNumber, "BR")?.format(
+      "E.164"
+    ) as string;
+    formattedPhoneNumber = formattedPhoneNumber.includes("@c.us")
+      ? formattedPhoneNumber
+      : `${formattedPhoneNumber}@c.us`;
 
-    const telefoneTratado = phoneNumber +'@c.us';
+    console.log("phoneNumber", formattedPhoneNumber);
 
-
-
-    if (globalClientInstance) {
-      await globalClientInstance.sendText(telefoneTratado, message);
+    if (client) {
+      await client.sendText(formattedPhoneNumber, message);
     } else {
       console.error("Cliente não está definido");
     }
