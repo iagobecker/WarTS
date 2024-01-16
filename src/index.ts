@@ -207,7 +207,7 @@ const main = async () => {
     await client.sendText(telefoneTratado, message);
   }
 
-  // Evento de mudança de estado do cliente
+  // evento de mudança de estado do cliente
   function start(client: Whatsapp) {
     client.onStateChange((state) => {
       if (state === SocketState.CONNECTED) {
