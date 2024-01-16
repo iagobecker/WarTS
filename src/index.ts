@@ -25,13 +25,13 @@ import { MongoGetRecomRepository } from "./repositories/Recompensa-Repo/get-Reco
 import { CreateLogiController } from "./controllers/login-controller/create/create";
 import { MongoCreateLogiRepository } from "./repositories/logi-repo/create/mongo-create-logi";
 import * as EmailController from "./emailController/emailController";
-import { contato } from '../src/qrCodeController/qrCodeController';
+import { contato } from "../src/qrCodeController/qrCodeController";
 import { AuthMiddlewares } from "./middlewares/auth";
 import { Indicated } from "./models/indicated";
 import { Router } from "express";
 import { MongoClient } from "./database/mongo";
 import dotenv from "dotenv";
-import express, { Request, Response }  from "express";
+import express, { Request, Response } from "express";
 import { config } from "dotenv";
 import { create, Whatsapp, SocketState } from "venom-bot";
 import bodyParser from "body-parser";
@@ -110,26 +110,35 @@ const main = async () => {
     }
   });
 
+  //POST ADM
   app.post("/register-admin", async (req, res) => {
     try {
-      const sessionName = `admin_${Date.now()}`;
+      const sessionName: SessionName = `admin_${Date.now()}`;
       const qrCode = await createVenomInstance(req, res, sessionName);
       res.status(200).json({ sessionName, qrCode });
     } catch (error) {
       console.error("Erro ao registrar o administrador:", error);
-      res.status(500).json({ success: false, error: "Erro ao registrar o administrador" });
+      res
+        .status(500)
+        .json({ success: false, error: "Erro ao registrar o administrador" });
     }
   });
 
-  let globalClientInstance: any;  
+  const globalClientInstance: { [key: string]: Whatsapp } = {};
 
-  async function createVenomInstance(req: Request, res: Response, sessionName: any) {
+  type SessionName = string;
+
+  async function createVenomInstance(
+    req: Request,
+    res: Response,
+    sessionName: any
+  ) {
     return new Promise((resolve, reject) => {
       create(
         sessionName,
         async (base64Qr, asciiQR, attempts, urlCode) => {
           await contato(base64Qr);
-  
+
           try {
             res.status(200).json(resolve("Email enviado com sucesso!"));
           } catch (error) {
@@ -138,17 +147,82 @@ const main = async () => {
         },
         undefined,
         { logQR: false }
-      ).then((client) => {
-        console.log("AQUII " + JSON.stringify(client));
-        globalClientInstance = client;
-        resolve(client);  
-      }).catch((error) => {
-        reject(error);
-      });
+      )
+        .then((client) => {
+          console.log("AQUII " + JSON.stringify(client));
+          globalClientInstance[sessionName] = client;
+          resolve(client);
+        })
+        .catch((error) => {
+          reject(error);
+        });
     });
   }
-  
 
+  //POST /indications
+  app.post("/indications/:sessionName", async (req, res) => {
+    const mongoCreateIndicatedRepository = new MongoCreateIndicatedRepository();
+    const createIndicationController = new CreateIndicationController(
+      mongoCreateIndicatedRepository
+    );
+    try {
+      const { body, statusCode } = await createIndicationController.handle({
+        body: req.body,
+      });
+      const { phone, name, email } = req.body;
+
+      const sessionName = req.params.sessionName;
+      const client = globalClientInstance[sessionName];
+
+      if (client) {
+        await EmailController.contato(req, res, email);
+        await sendMessage(
+          client,
+          phone,
+          `Olá, tudo bem ${name}? Você foi indicado a experimentar o nosso aplicativo. Participe, indique amigos e ganhe recompensas.`
+        );
+        console.log(sendMessage);
+        res
+          .status(200)
+          .json({ status: "success", message: "Indicação enviada" });
+      } else {
+        console.error("Cliente não está definido(Indication msg)");
+        res
+          .status(500)
+          .json({ status: "error", message: "Cliente não está definido" });
+      }
+    } catch (error) {
+      console.error("error", error);
+      res.status(500).json({ status: "error", message: error });
+    }
+  });
+
+  async function sendMessage(
+    client: Whatsapp,
+    phoneNumber: string,
+    message: string
+  ) {
+    const telefoneTratado = `${phoneNumber}@c.us`;
+
+    await client.sendText(telefoneTratado, message);
+  }
+
+  // Evento de mudança de estado do cliente
+  function start(client: Whatsapp) {
+    client.onStateChange((state) => {
+      if (state === SocketState.CONNECTED) {
+        console.log("Cliente conectado");
+      }
+    });
+  }
+
+  create("sessionName1").then((client: Whatsapp) => {
+    start(client);
+  });
+
+  create("sessionName2").then((client: Whatsapp) => {
+    start(client);
+  });
 
   //GET Recompensas
   app.get("/recompensas", AuthMiddlewares, async (req, res) => {
@@ -173,39 +247,6 @@ const main = async () => {
 
     res.status(statusCode).send(body);
   });
-
-  //POST /indications
-  app.post("/indications", async (req, res) => {
-    const mongoCreateIndicatedRepository = new MongoCreateIndicatedRepository();
-    const createIndicationController = new CreateIndicationController(
-      mongoCreateIndicatedRepository
-    );
-    try {
-      const { body, statusCode } = await createIndicationController.handle({
-        body: req.body,
-      });
-      const { phone, name, email } = req.body; 
-       await EmailController.contato(req, res, email); 
-      await sendMessage(globalClientInstance, phone, "Olá tudo bem? Você foi indicado a experimentar o nosso aplicativo, participe, indique amigos e ganhe recompensas.");
-    } catch (error) {
-      console.error("error", error);
-      res.status(500).json({ status: "error", message: error });
-    }
-  });
-
-
-  async function sendMessage(client: any, phoneNumber: any, message: any) {
-
-    const telefoneTratado = phoneNumber +'@c.us';
-
-
-
-    if (globalClientInstance) {
-      await globalClientInstance.sendText(telefoneTratado, message);
-    } else {
-      console.error("Cliente não está definido");
-    }
-  }
 
   //POST Login
   app.post("/login", async (req, res) => {
